@@ -1,3 +1,7 @@
+# This python file is to test coherence analyses for a larger dataset. 
+# The data is from Brady Hotspring and is in hdf5 format.
+# This is not complete and is a work in progress.
+
 import os
 import pickle
 import sys
