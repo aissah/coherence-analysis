@@ -7,26 +7,33 @@ import pickle
 import sys
 from datetime import datetime
 import numpy as np
+import general_funcs
 
+# Take inputs from the command line
+averaging_window_length = int(sys.argv[1]) # Averaging window length in seconds
+sub_window_length = int(sys.argv[2]) # sub-window length in seconds
+overlap = int(sys.argv[3]) # overlap in seconds
+num_channels = int(sys.argv[4]) # number of sensors
+first_channel = int(sys.argv[5]) # first channel
+# event_id = int(sys.argv[1])  # Used to select the event template. Used: 2201050
+# first_channel = int(sys.argv[2])  # First channel in range of channels used. Used: 1000
+# last_channel = int(sys.argv[3])  # Last channel in range of channels used: Used:5000
+# batch = int(
+#     sys.argv[4]
+# )  # Batch of files assuming jobs are run in parallel for files in batches. Should be one if that is not the case.
+# batch_size = int(
+#     sys.argv[5]
+# )  # Number of files in batch. Should be number of files being considered if job is not done in batches
+# compression_flag = int(
+#     sys.argv[6]
+# )  # 1 if compressed data is used otherwise uncompressed data is used
 
-event_id = int(sys.argv[1])  # Used to select the event template. Used: 2201050
-first_channel = int(sys.argv[2])  # First channel in range of channels used. Used: 1000
-last_channel = int(sys.argv[3])  # Last channel in range of channels used: Used:5000
-batch = int(
-    sys.argv[4]
-)  # Batch of files assuming jobs are run in parallel for files in batches. Should be one if that is not the case.
-batch_size = int(
-    sys.argv[5]
-)  # Number of files in batch. Should be number of files being considered if job is not done in batches
-compression_flag = int(
-    sys.argv[6]
-)  # 1 if compressed data is used otherwise uncompressed data is used
-
-
+# Path to the directory containing the data files
 data_basepath = "/beegfs/projects/martin/BradyHotspring"  # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
 # files = os.listdir(data_basepath)
+# Path to the directory where the results will be saved
 save_location = "/u/st/by/aissah/scratch/event_detection/template_matching"  # "D:/CSM/Mines_Research/Test_data/"
-
+samples_per_sec = 1000
 
 # Get the file names of the data files by going through the folders contained
 # in the base path and putting together the paths to files ending in .h5
@@ -72,6 +79,22 @@ else:  # with more batches, append end of previous file for continuity
 # work on files after first file in batch. This works exactly as we handled the
 # beginning of later batches. Then we keep appending to the variables set up for
 # first file of the batch above
+
+norm_win_spectra, frequencies = normalised_windowed_spectra(data[first_channel:num_channels+first_channel:int(num_channels/nsensors)], sub_window_length, overlap, sample_interval=1/samples_per_sec)
+welch_coherence_mat = np.matmul(norm_win_spectra, np.conjugate(norm_win_spectra.transpose(0,2,1)))
+coherence = np.absolute(welch_coherence_mat)**2
+
+num_freqs = coherence.shape[0]
+eig_ratios = np.empty(num_freqs)
+eig_ratios_qr = np.empty(num_freqs)
+for d in range(num_freqs):
+    eigenvals, _ = np.linalg.eig(coherence[d])
+    eigenvals = np.sort(eigenvals)[::-1]
+    eig_ratios[d] = eigenvals[0]/np.sum(eigenvals)
+
+    Q,R = np.linalg.qr(norm_win_spectra[d])
+    qr_approx = np.sort(np.diag(np.absolute(R@R.transpose()))**2)[::-1]
+    eig_ratios_qr[d] = qr_approx[0]/np.sum(np.absolute(qr_approx))
 
 end_time = datetime.now()
 print(f"Duration: {end_time - start_time}", flush=True)
