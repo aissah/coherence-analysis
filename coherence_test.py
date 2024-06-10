@@ -1,13 +1,16 @@
 '''
 Test comparing the performance of various ways of doing coherence analysis
 '''
+from pathlib import Path
 import sys
 
-import numpy as np
+# import numpy as np
+import pickle
 
 import functions as func
 
 METHODS = ['exact', 'qr', 'svd', 'rsvd', 'power', 'qr iteration']
+save_location = Path("D:\CSM\Mines_Research\Repositories\Coherence_Analyses\test_results")
 
 if __name__ == '__main__':
     file = int(sys.argv[1])
@@ -24,6 +27,7 @@ if __name__ == '__main__':
     data,_= func.loadBradyHShdf5(file,normalize='no')
 
     detection_significance = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-
-    
+    savename = save_location / f"{method}_detection_significance_{file[-15:-3]}.pkl"
+    with open(savename, 'wb') as f:
+        pickle.dump(detection_significance, f)
     
