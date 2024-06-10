@@ -8,7 +8,6 @@ import sys
 from datetime import datetime
 import numpy as np
 
-import general_funcs
 import functions as func
 
 METHODS = ['exact', 'qr', 'svd', 'rsvd', 'power', 'qr iteration']
@@ -23,6 +22,9 @@ num_channels = int(sys.argv[6]) # number of sensors
 samples_per_sec = int(sys.argv[7]) # samples per second
 channel_offset = int(sys.argv[8]) # channel offset
 method = sys.argv[9] # method to use for coherence analysis
+batch = int(sys.argv[10]) # Batch of files assuming jobs are run in parallel for files in batches. Should be one if that is not the case.
+batch_size = int(sys.argv[11]) # Number of files in batch. Should be number of files being considered if job is not done in batches
+
 # batch = int(
 #     sys.argv[4]
 # )  # Batch of files assuming jobs are run in parallel for files in batches. Should be one if that is not the case.
