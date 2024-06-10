@@ -123,38 +123,13 @@ for a in data_files[1:]:
         detection_significances = np.append(detection_significances[np.newaxis], detection_significance[np.newaxis], axis=0)
     else:
         detection_significances = np.append(detection_significances, detection_significance[np.newaxis], axis=0)
+    # if method == 'qr':
+    #     eig_estimatess = np.append(eig_estimatess[np.newaxis], eig_estimates[np.newaxis], axis=0)
+    save_data = {'detection_significance': detection_significances, 'metadata': metadata}
 
-if compression_flag == 0:
-    savefile_name = (
-        save_location
-        + "/"
-        + str(event_id)
-        + "uncompressed_batch"
-        + str(batch)
-        + "_"
-        + metadata["files"][0]
-        + "_"
-        + metadata["files"][-1]
-    )
-else:
-    savefile_name = (
-        save_location
-        + "/"
-        + str(event_id)
-        + "_"
-        + compression_type
-        + "_"
-        + "_".join([str(int(a)) for a in metadata["compression_rates"][0]])
-        + "_batch"
-        + str(batch)
-        + "_"
-        + metadata["files"][0]
-        + "_"
-        + metadata["files"][-1]
-    )
-
-with open(savefile_name, "wb") as f:
-    pickle.dump([mean_ccs_acrossfiles, metadata], f)
+savename = save_location / f"{method}_detection_significance_{metadata["files"][0]}_{metadata["files"][-1]}.pkl" # need to modify to save with correct file nameS
+with open(savename, 'wb') as f:
+    pickle.dump(save_data, f)
 
 end_time = datetime.now()
 print(f"Total duration: {end_time - start_time}", flush=True)
