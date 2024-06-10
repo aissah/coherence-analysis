@@ -142,11 +142,12 @@ def qr_coherence(norm_win_spectra: np.ndarray):
 
     for d in range(num_frames):
         _,R = np.linalg.qr(norm_win_spectra[d])
-        qr_approx = np.sort(np.diag(np.absolute(R@R.transpose())))[::-1]
+        qr_approx = np.diag(np.absolute(R@R.transpose()))
+        sorted_qr_approx = np.sort(qr_approx)[::-1]
 
-        detection_significance[d] = qr_approx[0]/np.sum(np.absolute(qr_approx))
+        detection_significance[d] = sorted_qr_approx[0]/np.sum(np.absolute(sorted_qr_approx))
     
-    return detection_significance
+    return detection_significance, qr_approx
 
 def rsvd_coherence(norm_win_spectra: np.ndarray, approx_rank: int =10):
     '''
