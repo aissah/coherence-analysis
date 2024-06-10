@@ -6,6 +6,7 @@ Test comparing the performance of various ways of doing coherence analysis
 from pathlib import Path
 import sys
 
+from datetime import datetime
 # import numpy as np
 import pickle
 
@@ -14,6 +15,7 @@ import functions as func
 METHODS = ['exact', 'qr', 'svd', 'rsvd', 'power', 'qr iteration']
 save_location = Path("D:/CSM/Mines_Research/Repositories/Coherence_Analyses/test_results")
 
+start_time = datetime.now()
 if __name__ == '__main__':
     file = sys.argv[1]
     averaging_window_length = int(sys.argv[2]) # Averaging window length in seconds
@@ -34,7 +36,8 @@ if __name__ == '__main__':
     elif method in METHODS:
         detection_significance = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
         save_data = {'detection_significance': detection_significance}
-    print(detection_significance.shape, flush=True)
+    # print(detection_significance.shape, flush=True)
+    print(f"Finished in: {datetime.now()-start_time}. Saving to file...", flush=True)
     savename = save_location / f"{method}_detection_significance_{str(file)[-15:-3]}.pkl"
     with open(savename, 'wb') as f:
         pickle.dump(save_data, f)

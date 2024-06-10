@@ -86,7 +86,7 @@ else:  # with more batches, append end of previous file for continuity
 # first file of the batch above
 
 if method == 'qr':
-        detection_significances, eig_estimatess = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+    detection_significances, eig_estimatess = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
 elif method in METHODS:
     detection_significances = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
 
@@ -118,6 +118,11 @@ for a in data_files[1:]:
         detection_significance, eig_estimates = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
     elif method in METHODS:
         detection_significance = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+
+    if detection_significance.shape == detection_significances.shape:
+        detection_significances = np.append(detection_significances[np.newaxis], detection_significance[np.newaxis], axis=0)
+    else:
+        detection_significances = np.append(detection_significances, detection_significance[np.newaxis], axis=0)
 
 if compression_flag == 0:
     savefile_name = (
