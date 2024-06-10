@@ -28,9 +28,14 @@ if __name__ == '__main__':
     file = Path(file) # r"D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5"
     data,_= func.loadBradyHShdf5(file,normalize='no')
 
-    detection_significance = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+    if method == 'qr':
+        detection_significance, eig_estimates = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+        save_data = {'detection_significance': detection_significance, 'eig_estimates': eig_estimates}
+    elif method in METHODS:
+        detection_significance = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+        save_data = {'detection_significance': detection_significance}
     print(detection_significance.shape, flush=True)
     savename = save_location / f"{method}_detection_significance_{str(file)[-15:-3]}.pkl"
     with open(savename, 'wb') as f:
-        pickle.dump(detection_significance, f)
+        pickle.dump(save_data, f)
     

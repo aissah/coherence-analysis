@@ -7,7 +7,11 @@ import pickle
 import sys
 from datetime import datetime
 import numpy as np
+
 import general_funcs
+import functions as func
+
+METHODS = ['exact', 'qr', 'svd', 'rsvd', 'power', 'qr iteration']
 
 # Take inputs from the command line
 file = sys.argv[1]
@@ -32,9 +36,12 @@ method = sys.argv[9] # method to use for coherence analysis
 # Path to the directory containing the data files
 data_basepath = "/beegfs/projects/martin/BradyHotspring"  # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
 # files = os.listdir(data_basepath)
+
 # Path to the directory where the results will be saved
 save_location = "/u/st/by/aissah/scratch/event_detection/template_matching"  # "D:/CSM/Mines_Research/Test_data/"
-samples_per_sec = 1000
+# samples_per_sec = 1000
+
+start_time = datetime.now()
 
 # Get the file names of the data files by going through the folders contained
 # in the base path and putting together the paths to files ending in .h5
@@ -50,12 +57,12 @@ for dir_path, dir_names, file_names in os.walk(data_basepath):
         ]
     )
 
-
+metadata = {}
 if batch == 1:
     first_file_time = data_files[0][-15:-3]
 
     data_files = data_files[:batch_size]
-    data, _ = general_funcs.loadBradyHShdf5(data_files[0], normalize="no")
+    data, _ = func.loadBradyHShdf5(data_files[0], normalize="no")
     # data = data[first_channel:last_channel]
     data = data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)]
 else:  # with more batches, append end of previous file for continuity
@@ -65,45 +72,52 @@ else:  # with more batches, append end of previous file for continuity
     except IndexError:
         data_files = data_files[(batch - 1) * batch_size - 1 :]
         metadata["files"] = [a[-15:-3] for a in data_files]
-    data, _ = general_funcs.loadBradyHShdf5(data_files[1], normalize="no")
-    metadata["start_lag"] = (
-        (batch - 1) * batch_size * len(data[0]) - len(template[0]) + 1
-    )
-
-    preceding_data, _ = general_funcs.loadBradyHShdf5(data_files[0], normalize="no")
-    data = np.append(
-        preceding_data[first_channel:last_channel, -len(template[1]) + 1 :],
-        data[first_channel:last_channel],
-        axis=1,
-    )
+    data, _ = func.loadBradyHShdf5(data_files[1], normalize="no")
+    data = data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)]
+    # preceding_data, _ = func.loadBradyHShdf5(data_files[0], normalize="no")
+    # data = np.append(
+    #     preceding_data[first_channel:last_channel, -len(template[1]) + 1 :],
+    #     data[first_channel:last_channel],
+    #     axis=1,
+    # )
 
 # work on files after first file in batch. This works exactly as we handled the
 # beginning of later batches. Then we keep appending to the variables set up for
 # first file of the batch above
 
-norm_win_spectra, frequencies = normalised_windowed_spectra(data[first_channel:num_channels+first_channel:int(num_channels/nsensors)], sub_window_length, overlap, sample_interval=1/samples_per_sec)
-welch_coherence_mat = np.matmul(norm_win_spectra, np.conjugate(norm_win_spectra.transpose(0,2,1)))
-coherence = np.absolute(welch_coherence_mat)**2
+if method == 'qr':
+        detection_significances, eig_estimatess = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+elif method in METHODS:
+    detection_significances = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
 
-num_freqs = coherence.shape[0]
-eig_ratios = np.empty(num_freqs)
-eig_ratios_qr = np.empty(num_freqs)
-for d in range(num_freqs):
-    eigenvals, _ = np.linalg.eig(coherence[d])
-    eigenvals = np.sort(eigenvals)[::-1]
-    eig_ratios[d] = eigenvals[0]/np.sum(eigenvals)
+# norm_win_spectra, frequencies = func.normalised_windowed_spectra(data[first_channel:num_channels+first_channel:int(num_channels/nsensors)], sub_window_length, overlap, sample_interval=1/samples_per_sec)
+# welch_coherence_mat = np.matmul(norm_win_spectra, np.conjugate(norm_win_spectra.transpose(0,2,1)))
+# coherence = np.absolute(welch_coherence_mat)**2
 
-    Q,R = np.linalg.qr(norm_win_spectra[d])
-    qr_approx = np.sort(np.diag(np.absolute(R@R.transpose()))**2)[::-1]
-    eig_ratios_qr[d] = qr_approx[0]/np.sum(np.absolute(qr_approx))
+# num_freqs = coherence.shape[0]
+# eig_ratios = np.empty(num_freqs)
+# eig_ratios_qr = np.empty(num_freqs)
+# for d in range(num_freqs):
+#     eigenvals, _ = np.linalg.eig(coherence[d])
+#     eigenvals = np.sort(eigenvals)[::-1]
+#     eig_ratios[d] = eigenvals[0]/np.sum(eigenvals)
+
+#     Q,R = np.linalg.qr(norm_win_spectra[d])
+#     qr_approx = np.sort(np.diag(np.absolute(R@R.transpose()))**2)[::-1]
+#     eig_ratios_qr[d] = qr_approx[0]/np.sum(np.absolute(qr_approx))
 
 end_time = datetime.now()
-print(f"Duration: {end_time - start_time}", flush=True)
+print(f"First file completed in: {end_time - start_time}", flush=True)
 
 for a in data_files[1:]:
-    preceding_data = data[:, -len(template[1]) + 1 :]
-    data, _ = general_funcs.loadBradyHShdf5(a, normalize="no")
-    data = np.append(preceding_data, data[first_channel:last_channel], axis=1)
+    # preceding_data = data[:, -len(template[1]) + 1 :]
+    data, _ = func.loadBradyHShdf5(a, normalize="no")
+    # data = np.append(preceding_data, data[first_channel:last_channel], axis=1)
+    data = data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)]
+    if method == 'qr':
+        detection_significance, eig_estimates = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+    elif method in METHODS:
+        detection_significance = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
 
 if compression_flag == 0:
     savefile_name = (
