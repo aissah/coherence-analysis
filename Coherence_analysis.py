@@ -10,14 +10,15 @@ import numpy as np
 import general_funcs
 
 # Take inputs from the command line
-averaging_window_length = int(sys.argv[1]) # Averaging window length in seconds
-sub_window_length = int(sys.argv[2]) # sub-window length in seconds
-overlap = int(sys.argv[3]) # overlap in seconds
-num_channels = int(sys.argv[4]) # number of sensors
+file = sys.argv[1]
+averaging_window_length = int(sys.argv[2]) # Averaging window length in seconds
+sub_window_length = int(sys.argv[3]) # sub-window length in seconds
+overlap = int(sys.argv[4]) # overlap in seconds
 first_channel = int(sys.argv[5]) # first channel
-# event_id = int(sys.argv[1])  # Used to select the event template. Used: 2201050
-# first_channel = int(sys.argv[2])  # First channel in range of channels used. Used: 1000
-# last_channel = int(sys.argv[3])  # Last channel in range of channels used: Used:5000
+num_channels = int(sys.argv[6]) # number of sensors
+samples_per_sec = int(sys.argv[7]) # samples per second
+channel_offset = int(sys.argv[8]) # channel offset
+method = sys.argv[9] # method to use for coherence analysis
 # batch = int(
 #     sys.argv[4]
 # )  # Batch of files assuming jobs are run in parallel for files in batches. Should be one if that is not the case.
@@ -55,8 +56,8 @@ if batch == 1:
 
     data_files = data_files[:batch_size]
     data, _ = general_funcs.loadBradyHShdf5(data_files[0], normalize="no")
-    data = data[first_channel:last_channel]
-
+    # data = data[first_channel:last_channel]
+    data = data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)]
 else:  # with more batches, append end of previous file for continuity
     try:
         data_files = data_files[(batch - 1) * batch_size - 1 : batch * batch_size]
