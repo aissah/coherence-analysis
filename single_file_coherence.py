@@ -1,7 +1,13 @@
-r"""
-Test comparing the performance of various ways of doing coherence analysis
-# python coherence_test.py <file> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <num_channels> <samples_per_sec> <channel_offset> <method>
-# python coherence_test.py "D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5" 0 2 0 3100 200 1000 2000 exact
+"""
+Computes the detection significance through coherence of a single file using various methods for coherence analysis
+This was written with the intention of comparing the performance of various ways of doing coherence analysis
+The results are saved to a file for later analysis
+The data intended for use here is from Brady Hotspring and is in hdf5 format.
+
+Can be run from the command line as follows:
+# python single_file_coerence.py <file> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <num_channels> <samples_per_sec> <channel_offset> <method>
+# Example:
+# python single_file_coerence.py "D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5" 0 2 0 3100 200 1000 2000 exact
 """
 # import numpy as np
 import pickle
