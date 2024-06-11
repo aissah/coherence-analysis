@@ -9,7 +9,6 @@ Can be run from the command line as follows:
 # Example:
 # python single_file_coerence.py "D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5" 0 2 0 3100 200 1000 2000 exact
 """
-# import numpy as np
 import pickle
 import sys
 from datetime import datetime
@@ -67,7 +66,7 @@ if __name__ == "__main__":
         )
         save_data = {"detection_significance": detection_significance}
     # print(detection_significance.shape, flush=True)
-    print(f"Finished in: {datetime.now()-start_time}. Saving to file...", flush=True)
+    print(f"Finished in: {datetime.now()-start_time} for {method} method. Saving to file...", flush=True)
     savename = (
         save_location / f"{method}_detection_significance_{str(file)[-15:-3]}.pkl"
     )

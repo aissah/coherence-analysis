@@ -2,6 +2,10 @@
 #SBATCH --job-name="Get Peaks"
 #SBATCH --time=01:00:00
 #SBATCH --export=ALL
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+
 
 module load apps/python3/2020.02
 
