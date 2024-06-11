@@ -1,6 +1,7 @@
 # This python file is to test coherence analyses for a larger dataset. 
 # The data is from Brady Hotspring and is in hdf5 format.
 # This is not complete and is a work in progress.
+# python coherence_test.py <file> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <num_channels> <samples_per_sec> <channel_offset> <method> <batch> <batch_size>
 
 import os
 import pickle

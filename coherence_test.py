@@ -1,44 +1,69 @@
-'''
+r"""
 Test comparing the performance of various ways of doing coherence analysis
 # python coherence_test.py <file> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <num_channels> <samples_per_sec> <channel_offset> <method>
 # python coherence_test.py "D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5" 0 2 0 3100 200 1000 2000 exact
-'''
-from pathlib import Path
-import sys
-
-from datetime import datetime
+"""
 # import numpy as np
 import pickle
+import sys
+from datetime import datetime
+from pathlib import Path
 
 import functions as func
 
-METHODS = ['exact', 'qr', 'svd', 'rsvd', 'power', 'qr iteration']
-save_location = Path("D:/CSM/Mines_Research/Repositories/Coherence_Analyses/test_results")
+METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+save_location = Path(
+    "D:/CSM/Mines_Research/Repositories/Coherence_Analyses/test_results"
+)
 
 start_time = datetime.now()
-if __name__ == '__main__':
+if __name__ == "__main__":
     file = sys.argv[1]
-    averaging_window_length = int(sys.argv[2]) # Averaging window length in seconds
-    sub_window_length = int(sys.argv[3]) # sub-window length in seconds
-    overlap = int(sys.argv[4]) # overlap in seconds
-    first_channel = int(sys.argv[5]) # first channel
-    num_channels = int(sys.argv[6]) # number of sensors
-    samples_per_sec = int(sys.argv[7]) # samples per second
-    channel_offset = int(sys.argv[8]) # channel offset
-    method = sys.argv[9] # method to use for coherence analysis
+    averaging_window_length = int(sys.argv[2])  # Averaging window length in seconds
+    sub_window_length = int(sys.argv[3])  # sub-window length in seconds
+    overlap = int(sys.argv[4])  # overlap in seconds
+    first_channel = int(sys.argv[5])  # first channel
+    num_channels = int(sys.argv[6])  # number of sensors
+    samples_per_sec = int(sys.argv[7])  # samples per second
+    channel_offset = int(sys.argv[8])  # channel offset
+    method = sys.argv[9]  # method to use for coherence analysis
 
-    file = Path(file) # r"D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5"
-    data,_= func.loadBradyHShdf5(file,normalize='no')
+    file = Path(
+        file
+    )  # r"D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5"
+    data, _ = func.loadBradyHShdf5(file, normalize="no")
 
-    if method == 'qr':
-        detection_significance, eig_estimates = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-        save_data = {'detection_significance': detection_significance, 'eig_estimates': eig_estimates}
+    if method == "qr":
+        detection_significance, eig_estimates = func.coherence(
+            data[
+                first_channel : channel_offset
+                + first_channel : int(channel_offset / num_channels)
+            ],
+            sub_window_length,
+            overlap,
+            sample_interval=1 / samples_per_sec,
+            method=method,
+        )
+        save_data = {
+            "detection_significance": detection_significance,
+            "eig_estimates": eig_estimates,
+        }
     elif method in METHODS:
-        detection_significance = func.coherence(data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)], sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-        save_data = {'detection_significance': detection_significance}
+        detection_significance = func.coherence(
+            data[
+                first_channel : channel_offset
+                + first_channel : int(channel_offset / num_channels)
+            ],
+            sub_window_length,
+            overlap,
+            sample_interval=1 / samples_per_sec,
+            method=method,
+        )
+        save_data = {"detection_significance": detection_significance}
     # print(detection_significance.shape, flush=True)
     print(f"Finished in: {datetime.now()-start_time}. Saving to file...", flush=True)
-    savename = save_location / f"{method}_detection_significance_{str(file)[-15:-3]}.pkl"
-    with open(savename, 'wb') as f:
+    savename = (
+        save_location / f"{method}_detection_significance_{str(file)[-15:-3]}.pkl"
+    )
+    with open(savename, "wb") as f:
         pickle.dump(save_data, f)
-    
