@@ -130,13 +130,15 @@ def exact_coherence(
     )
     num_frames = coherence.shape[0]
     detection_significance = np.empty(num_frames)
+    eigenvalss = np.empty((num_frames, coherence.shape[1]))  # store the eigenvalues
 
     for d in range(num_frames):
         eigenvals, _ = np.linalg.eig(coherence[d])
+        eigenvalss[d] = eigenvals
         eigenvals = np.sort(eigenvals)[::-1]
         detection_significance[d] = eigenvals[0] / np.sum(eigenvals)
 
-    return detection_significance
+    return detection_significance, eigenvalss
 
 
 def svd_coherence(norm_win_spectra: np.ndarray):
@@ -145,13 +147,15 @@ def svd_coherence(norm_win_spectra: np.ndarray):
     """
     num_frames = norm_win_spectra.shape[0]
     detection_significance = np.empty(num_frames)
+    svd_approxs = np.empty((norm_win_spectra.shape[0], norm_win_spectra.shape[1]))
 
     for d in range(num_frames):
         _, S, _ = np.linalg.svd(norm_win_spectra[d * 2])
         svd_approx = S**2
+        svd_approxs[d] = svd_approx
         detection_significance[d] = svd_approx[0] / np.sum(svd_approx)
 
-    return detection_significance
+    return detection_significance, svd_approxs
 
 
 def qr_coherence(norm_win_spectra: np.ndarray):
@@ -161,6 +165,7 @@ def qr_coherence(norm_win_spectra: np.ndarray):
     num_frames = norm_win_spectra.shape[0]
     detection_significance = np.empty(num_frames)
     qr_approxs = np.empty((norm_win_spectra.shape[0], norm_win_spectra.shape[2]))
+    
     for d in range(num_frames):
         _, R = np.linalg.qr(norm_win_spectra[d])
         qr_approx = np.diag(np.absolute(R @ R.transpose()))
@@ -182,13 +187,15 @@ def rsvd_coherence(norm_win_spectra: np.ndarray, approx_rank: int = 10):
 
     num_frames = norm_win_spectra.shape[0]
     detection_significance = np.empty(num_frames)
+    rsvd_approxs = np.empty((norm_win_spectra.shape[0], approx_rank))
 
     for d in range(num_frames):
         _, rS, _ = randomized_svd(norm_win_spectra[d], approx_rank)
         rsvd_approx = rS**2
+        rsvd_approxs[d] = rsvd_approx
         detection_significance[d] = rsvd_approx[0] / np.sum(rsvd_approx)
 
-    return detection_significance
+    return detection_significance,  rsvd_approxs
 
 
 def qr_iteration(A, tol=1e-6, max_iter=1000):

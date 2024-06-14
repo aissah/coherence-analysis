@@ -101,23 +101,9 @@ if __name__ == "__main__":
         detection_significances, eig_estimatess = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
     elif method in METHODS:
         detection_significances = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-
-    # norm_win_spectra, frequencies = func.normalised_windowed_spectra(data[first_channel:num_channels+first_channel:int(num_channels/nsensors)], sub_window_length, overlap, sample_interval=1/samples_per_sec)
-    # welch_coherence_mat = np.matmul(norm_win_spectra, np.conjugate(norm_win_spectra.transpose(0,2,1)))
-    # coherence = np.absolute(welch_coherence_mat)**2
-
-    # num_freqs = coherence.shape[0]
-    # eig_ratios = np.empty(num_freqs)
-    # eig_ratios_qr = np.empty(num_freqs)
-    # for d in range(num_freqs):
-    #     eigenvals, _ = np.linalg.eig(coherence[d])
-    #     eigenvals = np.sort(eigenvals)[::-1]
-    #     eig_ratios[d] = eigenvals[0]/np.sum(eigenvals)
-
-    #     Q,R = np.linalg.qr(norm_win_spectra[d])
-    #     qr_approx = np.sort(np.diag(np.absolute(R@R.transpose()))**2)[::-1]
-    #     eig_ratios_qr[d] = qr_approx[0]/np.sum(np.absolute(qr_approx))
-
+    else:
+        raise ValueError(f"Method {method} not available for coherence analysis")
+    
     end_time = datetime.now()
     print(f"First file completed in: {end_time - start_time}", flush=True)
 
@@ -128,13 +114,12 @@ if __name__ == "__main__":
         data = data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)]
         if method == 'qr':
             detection_significance, eig_estimates = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-        elif method in METHODS:
+        else: # elif method in METHODS:
             detection_significance = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-        else:
-            raise ValueError(f"Method {method} not available for coherence analysis")
 
-        if detection_significance.shape == detection_significances.shape:
+        if detection_significance.shape == detection_significances.shape and method == 'qr':
             detection_significances = np.append(detection_significances[np.newaxis], detection_significance[np.newaxis], axis=0)
+            eig_estimatess = np.append(eig_estimatess[np.newaxis], eig_estimates[np.newaxis], axis=0)
         else:
             detection_significances = np.append(detection_significances, detection_significance[np.newaxis], axis=0)
         # if method == 'qr':

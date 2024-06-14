@@ -38,7 +38,7 @@ if __name__ == "__main__":
     )  # r"D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5"
     data, _ = func.loadBradyHShdf5(file, normalize="no")
 
-    if method == "qr":
+    if True: # method == "qr":
         detection_significance, eig_estimates = func.coherence(
             data[
                 first_channel : channel_offset
@@ -71,4 +71,9 @@ if __name__ == "__main__":
         save_location / f"{method}_detection_significance_{str(file)[-15:-3]}.pkl"
     )
     with open(savename, "wb") as f:
-        pickle.dump(save_data, f)
+        pickle.dump(detection_significance, f)
+    savename = (
+        save_location / f"{method}_eig_estimates_{str(file)[-15:-3]}.pkl"
+    )
+    with open(savename, "wb") as f:
+        pickle.dump(eig_estimates, f)
