@@ -12,8 +12,16 @@ source activate ny_env
 
 python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0 3100 2000 200 1000 qr 1 0
 
-echo "First Job finished"
+echo "QR Job finished"
 
 python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0 3100 2000 200 1000 exact 1 0
 
-echo "Second Job finished"
+echo "Exact Job finished"
+
+python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0 3100 2000 200 1000 svd 1 0
+
+echo "SVD Job finished"
+
+python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0 3100 2000 200 1000 rsvd 1 0
+
+echo "rSVD Job finished"
