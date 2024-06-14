@@ -253,7 +253,7 @@ def coherence(
     data: np.array,
     subwindow_len: int,
     overlap: int,
-    freq=None,
+    resolution:float=0.1,
     sample_interval: float = 1,
     method: str = "exact",
     approx_rank: int = 10,
@@ -295,17 +295,17 @@ def coherence(
         norm_win_spectra, _ = normalised_windowed_spectra(
             data, subwindow_len, overlap, sample_interval=sample_interval
         )
-        return qr_coherence(norm_win_spectra)
+        return qr_coherence(norm_win_spectra, resolution=resolution)
     elif method == "svd":
         norm_win_spectra, _ = normalised_windowed_spectra(
             data, subwindow_len, overlap, sample_interval=sample_interval
         )
-        return svd_coherence(norm_win_spectra)
+        return svd_coherence(norm_win_spectra, resolution=resolution)
     elif method == "rsvd":
         norm_win_spectra, _ = normalised_windowed_spectra(
             data, subwindow_len, overlap, sample_interval=sample_interval
         )
-        return rsvd_coherence(norm_win_spectra)
+        return rsvd_coherence(norm_win_spectra, resolution=resolution, approx_rank=approx_rank)
     elif method == "power":
         return power_iteration(data, tol=1e-6, max_iter=1000)
     elif method == "qr iteration":
