@@ -130,6 +130,10 @@ def exact_coherence(
     )
     num_frames = coherence.shape[0]
     num_frames = int(num_frames * resolution)
+
+    # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
+    num_frames = int(num_frames * 3/5)
+
     num_subwindows = coherence.shape[2]
     detection_significance = np.empty(num_frames)
     eigenvalss = np.empty((num_frames, num_subwindows))  # store the eigenvalues
