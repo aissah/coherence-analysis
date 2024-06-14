@@ -120,7 +120,7 @@ def welch_coherence(
 
 
 def exact_coherence(
-    data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
+    data: np.array, subwindow_len: int, overlap, resolution=0.1, sample_interval=1
 ):
     """
     Compute the k largest eigenvalues of A using the randomized SVD method
@@ -133,7 +133,7 @@ def exact_coherence(
     detection_significance = np.empty(num_frames)
     eigenvalss = np.empty((num_frames, num_subwindows))  # store the eigenvalues
 
-    for d in range(num_frames):
+    for d in range(0, num_frames, int(1/resolution)):
         eigenvals, _ = np.linalg.eig(coherence[d])
         eigenvalss[d] = eigenvals[:num_subwindows]
         eigenvals = np.sort(eigenvals)[::-1]
