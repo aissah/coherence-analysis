@@ -5,9 +5,10 @@ The results are saved to a file for later analysis
 The data intended for use here is from Brady Hotspring and is in hdf5 format.
 
 Can be run from the command line as follows:
-# python single_file_coerence.py <file> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <num_channels> <samples_per_sec> <channel_offset> <method>
-# Example:
-# python single_file_coerence.py "D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5" 0 2 0 3100 200 1000 2000 exact
+python single_file_coerence.py <file> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <num_channels> <samples_per_sec> <channel_offset> <method>
+Example:
+- python single_file_coerence.py "D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5" 0 2 0 3100 200 1000 2000 exact
+- python single_file_coherence.py "D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160314083848.h5" 0 2 0 3100 200 1000 2000 qr
 """
 import pickle
 import sys
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     )  # r"D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5"
     data, _ = func.loadBradyHShdf5(file, normalize="no")
 
-    if True:  # method == "qr":
+    if method in METHODS:  # method == "qr":
         detection_significance, eig_estimates = func.coherence(
             data[
                 first_channel : channel_offset
@@ -49,22 +50,13 @@ if __name__ == "__main__":
             sample_interval=1 / samples_per_sec,
             method=method,
         )
-        save_data = {
-            "detection_significance": detection_significance,
-            "eig_estimates": eig_estimates,
-        }
-    elif method in METHODS:
-        detection_significance = func.coherence(
-            data[
-                first_channel : channel_offset
-                + first_channel : int(channel_offset / num_channels)
-            ],
-            sub_window_length,
-            overlap,
-            sample_interval=1 / samples_per_sec,
-            method=method,
-        )
-        save_data = {"detection_significance": detection_significance}
+        # save_data = {
+        #     "detection_significance": detection_significance,
+        #     "eig_estimates": eig_estimates,
+        # }
+    else:
+        raise ValueError(f"Invalid method: {method}. Valid methods are: {METHODS}")
+
     # print(detection_significance.shape, flush=True)
     print(
         f"Finished in: {datetime.now()-start_time} for {method} method. Saving to file...",
