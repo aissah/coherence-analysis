@@ -78,7 +78,7 @@ if __name__ == "__main__":
     # data_basepath = "/beegfs/projects/martin/BradyHotspring"  # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
 
     # Path to the directory where the results will be saved
-    save_location = "/u/st/by/aissah/scratch/coherence_results"  # "D:/CSM/Mines_Research/Test_data/"
+    save_location = "/u/st/by/aissah/scratch/coherence/coherence_test_results"  # "D:/CSM/Mines_Research/Test_data/"
 
     # Get the file names of the data files by going through the folders contained
     # in the base path and putting together the paths to files ending in .h5
