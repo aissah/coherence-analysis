@@ -129,12 +129,13 @@ def exact_coherence(
         data, subwindow_len, overlap, sample_interval=sample_interval
     )
     num_frames = coherence.shape[0]
+    num_frames = int(num_frames * resolution)
     num_subwindows = coherence.shape[2]
     detection_significance = np.empty(num_frames)
     eigenvalss = np.empty((num_frames, num_subwindows))  # store the eigenvalues
 
-    for d in range(0, num_frames, int(1/resolution)):
-        eigenvals, _ = np.linalg.eig(coherence[d])
+    for d in range(num_frames):
+        eigenvals, _ = np.linalg.eig(coherence[d*int(1/resolution)])
         eigenvalss[d] = eigenvals[:num_subwindows]
         eigenvals = np.sort(eigenvals)[::-1]
         detection_significance[d] = eigenvals[0] / np.sum(eigenvals)
