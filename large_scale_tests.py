@@ -97,12 +97,17 @@ if __name__ == "__main__":
     # work on files after first file in batch. This works exactly as we handled the
     # beginning of later batches. Then we keep appending to the variables set up for
     # first file of the batch above
-    if method == 'qr':
+    if method in METHODS:
         detection_significances, eig_estimatess = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-    elif method in METHODS:
-        detection_significances = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
     else:
         raise ValueError(f"Method {method} not available for coherence analysis")
+
+    # if method == 'qr':
+    #     detection_significances, eig_estimatess = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+    # elif method in METHODS:
+    #     detection_significances = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+    # else:
+    #     raise ValueError(f"Method {method} not available for coherence analysis")
     
     end_time = datetime.now()
     print(f"First file completed in: {end_time - start_time}", flush=True)
@@ -112,24 +117,38 @@ if __name__ == "__main__":
         data, _ = func.loadBradyHShdf5(a, normalize="no")
         # data = np.append(preceding_data, data[first_channel:last_channel], axis=1)
         data = data[first_channel:channel_offset+first_channel:int(channel_offset/num_channels)]
-        if method == 'qr':
-            detection_significance, eig_estimates = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-        else: # elif method in METHODS:
-            detection_significance = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
 
-        if detection_significance.shape == detection_significances.shape and method == 'qr':
+        detection_significance, eig_estimates = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+
+        # if method == 'qr':
+        #     detection_significance, eig_estimates = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+        # else: # elif method in METHODS:
+        #     detection_significance = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+
+        if detection_significance.shape == detection_significances.shape:
             detection_significances = np.append(detection_significances[np.newaxis], detection_significance[np.newaxis], axis=0)
-            eig_estimatess = np.append(eig_estimatess[np.newaxis], eig_estimates[np.newaxis], axis=0)
+            # eig_estimatess = np.append(eig_estimatess[np.newaxis], eig_estimates[np.newaxis], axis=0)
         else:
             detection_significances = np.append(detection_significances, detection_significance[np.newaxis], axis=0)
-        # if method == 'qr':
-        #     eig_estimatess = np.append(eig_estimatess[np.newaxis], eig_estimates[np.newaxis], axis=0)
-        save_data = {'detection_significance': detection_significances, 'metadata': metadata}
 
+        eig_estimatess = np.append(eig_estimatess, eig_estimates, axis=1)
+    
     print(f"Finished in: {datetime.now()-start_time} for {method} method. Saving to file...", flush=True)
-    savename = save_location / f"{method}_detection_significance_{metadata["files"][0]}_{metadata["files"][-1]}.pkl" # need to modify to save with correct file nameS
+
+    # save the results of detection significance, eigenvalues, and metadata to different files
+    # save_data = {'detection_significance': detection_significances, 'metadata': metadata}
+    savename = save_location / f"{method}_detection_significance_{metadata["files"][0]}_{metadata["files"][-1]}.pkl"
     with open(savename, 'wb') as f:
-        pickle.dump(save_data, f)
+        pickle.dump(detection_significances, f)
+
+    # save_data = {'eig_estimates': eig_estimatess, 'metadata': metadata}
+    savename = save_location / f"{method}_eig_estimatess_{metadata["files"][0]}_{metadata["files"][-1]}.pkl"
+    with open(savename, 'wb') as f:
+        pickle.dump(eig_estimatess, f)
+
+    savename = save_location / f"{method}_metadata_{metadata["files"][0]}_{metadata["files"][-1]}.pkl" 
+    with open(savename, 'wb') as f:
+        pickle.dump(metadata, f)
 
     end_time = datetime.now()
     print(f"Total duration: {end_time - start_time}", flush=True)
