@@ -120,7 +120,11 @@ def welch_coherence(
 
 
 def exact_coherence(
-    data: np.array, subwindow_len: int, overlap: int = 0, resolution: float=0.1, sample_interval=1
+    data: np.array,
+    subwindow_len: int,
+    overlap: int = 0,
+    resolution: float = 0.1,
+    sample_interval=1,
 ):
     """
     Compute the k largest eigenvalues of A using the randomized SVD method
@@ -132,14 +136,14 @@ def exact_coherence(
     num_frames = int(num_frames * resolution)
 
     # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
-    num_frames = int(num_frames * 3/5)
+    num_frames = int(num_frames * 3 / 5)
 
     num_subwindows = coherence.shape[2]
     detection_significance = np.empty(num_frames)
     eigenvalss = np.empty((num_frames, num_subwindows))  # store the eigenvalues
 
     for d in range(num_frames):
-        eigenvals, _ = np.linalg.eig(coherence[d*int(1/resolution)])
+        eigenvals, _ = np.linalg.eig(coherence[d * int(1 / resolution)])
         eigenvalss[d] = eigenvals[:num_subwindows]
         eigenvals = np.sort(eigenvals)[::-1]
         detection_significance[d] = eigenvals[0] / np.sum(eigenvals)
@@ -147,7 +151,7 @@ def exact_coherence(
     return detection_significance, eigenvalss
 
 
-def svd_coherence(norm_win_spectra: np.ndarray, resolution: float=0.1):
+def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
     """
     Compute the k largest eigenvalues of A using the randomized SVD method
     """
@@ -155,7 +159,7 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float=0.1):
     num_frames = int(num_frames * resolution)
 
     # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
-    num_frames = int(num_frames * 3/5)
+    num_frames = int(num_frames * 3 / 5)
 
     num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
@@ -170,7 +174,7 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float=0.1):
     return detection_significance, svd_approxs
 
 
-def qr_coherence(norm_win_spectra: np.ndarray, resolution: float=0.1):
+def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
     """
     Approximate the coherence of A using the QR decompositon
     """
@@ -178,7 +182,7 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float=0.1):
     num_frames = int(num_frames * resolution)
 
     # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
-    num_frames = int(num_frames * 3/5)
+    num_frames = int(num_frames * 3 / 5)
 
     num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
@@ -197,7 +201,9 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float=0.1):
     return detection_significance, qr_approxs
 
 
-def rsvd_coherence(norm_win_spectra: np.ndarray, resolution: int = 0.1, approx_rank: int = None):
+def rsvd_coherence(
+    norm_win_spectra: np.ndarray, resolution: int = 0.1, approx_rank: int = None
+):
     """
     Compute the k largest eigenvalues of A using the randomized SVD method
     """
@@ -207,7 +213,7 @@ def rsvd_coherence(norm_win_spectra: np.ndarray, resolution: int = 0.1, approx_r
     num_frames = int(num_frames * resolution)
 
     # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
-    num_frames = int(num_frames * 3/5)
+    num_frames = int(num_frames * 3 / 5)
 
     if approx_rank is None:
         approx_rank = norm_win_spectra.shape[2]
@@ -253,7 +259,7 @@ def coherence(
     data: np.array,
     subwindow_len: int,
     overlap: int,
-    resolution:float=0.1,
+    resolution: float = 0.1,
     sample_interval: float = 1,
     method: str = "exact",
     approx_rank: int = 10,
@@ -305,7 +311,9 @@ def coherence(
         norm_win_spectra, _ = normalised_windowed_spectra(
             data, subwindow_len, overlap, sample_interval=sample_interval
         )
-        return rsvd_coherence(norm_win_spectra, resolution=resolution, approx_rank=approx_rank)
+        return rsvd_coherence(
+            norm_win_spectra, resolution=resolution, approx_rank=approx_rank
+        )
     elif method == "power":
         return power_iteration(data, tol=1e-6, max_iter=1000)
     elif method == "qr iteration":

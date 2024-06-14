@@ -20,13 +20,14 @@ Example:
 - python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0 3100 2000 200 1000 exact 1 0
 """
 import os
+import pickle
 import sys
 from datetime import datetime
 
 import numpy as np
-import pickle
 
 import functions as func
+
 
 def _next_data_window(data_files, next_index, averaging_window_length, samples_per_sec):
     num_files = len(data_files)
@@ -35,6 +36,7 @@ def _next_data_window(data_files, next_index, averaging_window_length, samples_p
         first_channel : channel_offset
         + first_channel : int(channel_offset / num_channels)
     ]
+    len_data = data.shape[1] / samples_per_sec
     next_index += 1
     while len_data < averaging_window_length and next_index < num_files:
         next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
@@ -48,6 +50,7 @@ def _next_data_window(data_files, next_index, averaging_window_length, samples_p
         len_data = data.shape[1] / samples_per_sec
         next_index += 1
     return data, next_index
+
 
 if __name__ == "__main__":
     # record start time
@@ -64,7 +67,9 @@ if __name__ == "__main__":
     overlap = int(sys.argv[4])  # overlap in seconds
     first_channel = int(sys.argv[5])  # first channel
     channel_offset = int(sys.argv[6])  # Number of channels to choose from
-    num_channels = int(sys.argv[7])  # Number of channels to subselect from the range of channels
+    num_channels = int(
+        sys.argv[7]
+    )  # Number of channels to subselect from the range of channels
     samples_per_sec = int(sys.argv[8])  # samples per second
     method = sys.argv[9]  # method to use for coherence analysis
     batch = int(
@@ -149,7 +154,9 @@ if __name__ == "__main__":
     #     len_data = data.shape[1] / samples_per_sec
     #     next_index += 1
 
-    data, next_index = _next_data_window(data_files, next_index, averaging_window_length, samples_per_sec)
+    data, next_index = _next_data_window(
+        data_files, next_index, averaging_window_length, samples_per_sec
+    )
 
     # work on files after first file in batch. This works exactly as we handled the
     # beginning of later batches. Then we keep appending to the variables set up for
@@ -195,7 +202,9 @@ if __name__ == "__main__":
         #     len_data = data.shape[1] / samples_per_sec
         #     next_index += 1
 
-        data, next_index = _next_data_window(data_files, next_index, averaging_window_length, samples_per_sec)
+        data, next_index = _next_data_window(
+            data_files, next_index, averaging_window_length, samples_per_sec
+        )
 
         # preceding_data = data[:, -overlap * samples_per_sec :]
         # data, _ = func.loadBradyHShdf5(a, normalize="no")
@@ -239,17 +248,26 @@ if __name__ == "__main__":
 
     # save the results of detection significance, eigenvalues, and metadata to different files
     # save_data = {'detection_significance': detection_significances, 'metadata': metadata}
-    savename = save_location / f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    with open(savename, 'wb') as f:
+    savename = (
+        save_location
+        / f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
+    )
+    with open(savename, "wb") as f:
         pickle.dump(detection_significances, f)
 
     # save_data = {'eig_estimates': eig_estimatess, 'metadata': metadata}
-    savename = save_location / f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    with open(savename, 'wb') as f:
+    savename = (
+        save_location
+        / f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
+    )
+    with open(savename, "wb") as f:
         pickle.dump(eig_estimatess, f)
 
-    savename = save_location / f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    with open(savename, 'wb') as f:
+    savename = (
+        save_location
+        / f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
+    )
+    with open(savename, "wb") as f:
         pickle.dump(metadata, f)
 
     end_time = datetime.now()
