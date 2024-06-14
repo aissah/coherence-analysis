@@ -120,7 +120,7 @@ def welch_coherence(
 
 
 def exact_coherence(
-    data: np.array, subwindow_len: int, overlap, resolution=0.1, sample_interval=1
+    data: np.array, subwindow_len: int, overlap: int = 0, resolution: float=0.1, sample_interval=1
 ):
     """
     Compute the k largest eigenvalues of A using the randomized SVD method
@@ -147,11 +147,16 @@ def exact_coherence(
     return detection_significance, eigenvalss
 
 
-def svd_coherence(norm_win_spectra: np.ndarray):
+def svd_coherence(norm_win_spectra: np.ndarray, resolution: float=0.1):
     """
     Compute the k largest eigenvalues of A using the randomized SVD method
     """
     num_frames = norm_win_spectra.shape[0]
+    num_frames = int(num_frames * resolution)
+
+    # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
+    num_frames = int(num_frames * 3/5)
+
     num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
     svd_approxs = np.empty((num_frames, num_subwindows))
@@ -165,11 +170,16 @@ def svd_coherence(norm_win_spectra: np.ndarray):
     return detection_significance, svd_approxs
 
 
-def qr_coherence(norm_win_spectra: np.ndarray):
+def qr_coherence(norm_win_spectra: np.ndarray, resolution: float=0.1):
     """
     Approximate the coherence of A using the QR decompositon
     """
     num_frames = norm_win_spectra.shape[0]
+    num_frames = int(num_frames * resolution)
+
+    # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
+    num_frames = int(num_frames * 3/5)
+
     num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
     qr_approxs = np.empty((num_frames, num_subwindows))
@@ -187,13 +197,18 @@ def qr_coherence(norm_win_spectra: np.ndarray):
     return detection_significance, qr_approxs
 
 
-def rsvd_coherence(norm_win_spectra: np.ndarray, approx_rank: int = None):
+def rsvd_coherence(norm_win_spectra: np.ndarray, resolution: int = 0.1, approx_rank: int = None):
     """
     Compute the k largest eigenvalues of A using the randomized SVD method
     """
     from sklearn.utils.extmath import randomized_svd
 
     num_frames = norm_win_spectra.shape[0]
+    num_frames = int(num_frames * resolution)
+
+    # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
+    num_frames = int(num_frames * 3/5)
+
     if approx_rank is None:
         approx_rank = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
