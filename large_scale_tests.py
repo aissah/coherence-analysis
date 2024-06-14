@@ -73,6 +73,14 @@ if __name__ == "__main__":
 
     # create a dictionary to store the metadata of the files
     metadata = {}
+    metadata["sampling_rate"] = samples_per_sec
+    metadata["averaging_window_length"] = averaging_window_length
+    metadata["sub_window_length"] = sub_window_length
+    metadata["overlap"] = overlap
+    metadata["first_channel"] = first_channel
+    metadata["num_channels"] = num_channels
+    metadata["channel_offset"] = channel_offset
+    metadata["method"] = method
 
     # load the first file in the batch
     if batch == 1:
