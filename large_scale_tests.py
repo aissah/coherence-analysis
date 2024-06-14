@@ -1,6 +1,7 @@
 """
 This python file is to test coherence analyses for a larger dataset. The was written for some 
 data from Brady Geothermal DAS experiment and is in hdf5 format. Can be ran as:
+TO DO: Add output directory as an argument
 python large_scale_test.py <data_location> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <channel_offset> <num_channels> <samples_per_sec> <method> <batch> <batch_size>
 - data_location: path to the directory containing the data files
 - averaging_window_length: Averaging window length in seconds
@@ -57,6 +58,7 @@ if __name__ == "__main__":
 
     # Take inputs from the command line
     data_basepath = sys.argv[1]  # Path to the directory containing the data files
+    # save_location = sys.argv[12]  # Path to the directory where the results will be saved
     averaging_window_length = int(sys.argv[2])  # Averaging window length in seconds
     sub_window_length = int(sys.argv[3])  # sub-window length in seconds
     overlap = int(sys.argv[4])  # overlap in seconds
@@ -76,7 +78,7 @@ if __name__ == "__main__":
     # data_basepath = "/beegfs/projects/martin/BradyHotspring"  # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
 
     # Path to the directory where the results will be saved
-    save_location = "/u/st/by/aissah/scratch/event_detection/template_matching"  # "D:/CSM/Mines_Research/Test_data/"
+    save_location = "/u/st/by/aissah/scratch/coherence_results"  # "D:/CSM/Mines_Research/Test_data/"
 
     # Get the file names of the data files by going through the folders contained
     # in the base path and putting together the paths to files ending in .h5
