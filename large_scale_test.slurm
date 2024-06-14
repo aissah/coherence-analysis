@@ -1,6 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="Get Peaks"
-#SBATCH --time=01:00:00
+#SBATCH --job-name="coherence largescale tests"
 #SBATCH --export=ALL
 #SBATCH --nodes=1
 #SBATCH --ntasks=1

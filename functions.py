@@ -129,12 +129,13 @@ def exact_coherence(
         data, subwindow_len, overlap, sample_interval=sample_interval
     )
     num_frames = coherence.shape[0]
+    num_subwindows = coherence.shape[2]
     detection_significance = np.empty(num_frames)
-    eigenvalss = np.empty((num_frames, coherence.shape[1]))  # store the eigenvalues
+    eigenvalss = np.empty((num_frames, num_subwindows))  # store the eigenvalues
 
     for d in range(num_frames):
         eigenvals, _ = np.linalg.eig(coherence[d])
-        eigenvalss[d] = eigenvals
+        eigenvalss[d] = eigenvals[:num_subwindows]
         eigenvals = np.sort(eigenvals)[::-1]
         detection_significance[d] = eigenvals[0] / np.sum(eigenvals)
 
@@ -146,13 +147,14 @@ def svd_coherence(norm_win_spectra: np.ndarray):
     Compute the k largest eigenvalues of A using the randomized SVD method
     """
     num_frames = norm_win_spectra.shape[0]
+    num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
-    svd_approxs = np.empty((norm_win_spectra.shape[0], norm_win_spectra.shape[1]))
+    svd_approxs = np.empty((num_frames, num_subwindows))
 
     for d in range(num_frames):
         _, S, _ = np.linalg.svd(norm_win_spectra[d * 2])
         svd_approx = S**2
-        svd_approxs[d] = svd_approx
+        svd_approxs[d] = svd_approx[:num_subwindows]
         detection_significance[d] = svd_approx[0] / np.sum(svd_approx)
 
     return detection_significance, svd_approxs
@@ -163,8 +165,9 @@ def qr_coherence(norm_win_spectra: np.ndarray):
     Approximate the coherence of A using the QR decompositon
     """
     num_frames = norm_win_spectra.shape[0]
+    num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
-    qr_approxs = np.empty((norm_win_spectra.shape[0], norm_win_spectra.shape[2]))
+    qr_approxs = np.empty((num_frames, num_subwindows))
 
     for d in range(num_frames):
         _, R = np.linalg.qr(norm_win_spectra[d])
@@ -179,15 +182,17 @@ def qr_coherence(norm_win_spectra: np.ndarray):
     return detection_significance, qr_approxs
 
 
-def rsvd_coherence(norm_win_spectra: np.ndarray, approx_rank: int = 10):
+def rsvd_coherence(norm_win_spectra: np.ndarray, approx_rank: int = None):
     """
     Compute the k largest eigenvalues of A using the randomized SVD method
     """
     from sklearn.utils.extmath import randomized_svd
 
     num_frames = norm_win_spectra.shape[0]
+    if approx_rank is None:
+        approx_rank = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
-    rsvd_approxs = np.empty((norm_win_spectra.shape[0], approx_rank))
+    rsvd_approxs = np.empty((num_frames, approx_rank))
 
     for d in range(num_frames):
         _, rS, _ = randomized_svd(norm_win_spectra[d], approx_rank)
