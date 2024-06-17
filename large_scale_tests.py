@@ -30,6 +30,35 @@ import functions as func
 
 
 def _next_data_window(data_files, next_index, averaging_window_length, samples_per_sec, start_sample_index=0):
+    """
+    Load the next data window from the data files. This function is used to load the next window of data
+    from the data files. It reads the data from the next file in the list of data files and appends it to the
+    data from the previous file. It continues to read data from the files until the window length is reached.
+    The function returns the data and the index of the next file to read data from.
+
+    Parameters
+    ----------
+    data_file : list
+        list of the data files to read data from
+    next_index : int
+        index of the next file to read data from
+    averaging_window_length : int
+        length of the averaging window in seconds
+    samples_per_sec : int
+        number of samples per second in the data
+    start_sample_index : int
+        index of the first sample to read from the next data file
+
+    Returns
+    -------
+    data : np array
+        data read from the data files
+    next_index : int
+        index of the next file to read data from
+    stop_sample_index : int
+        index we stopped reading data from file "next_index"
+        
+    """
 
     num_files = len(data_files)
     total_window_length = averaging_window_length * samples_per_sec
