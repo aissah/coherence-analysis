@@ -238,7 +238,7 @@ if __name__ == "__main__":
     print(f"First file completed in: {end_time - start_time}", flush=True)
 
     # for a in data_files[1:]:
-    while next_index < len(data_files):
+    while next_index < len(data_files)-1:
         # data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
         # data = data[
         #     first_channel : channel_offset
@@ -301,7 +301,7 @@ if __name__ == "__main__":
             eig_estimatess = np.append(eig_estimatess, eig_estimates, axis=1)
         else:
             print(
-                f"Data length of {data.shape[1]} not the expected {averaging_window_length * samples_per_sec} for analysis. {len(data_files) - next_index} files still remaining ",
+                f"Data length of {data.shape[1]} not the expected {averaging_window_length * samples_per_sec} for analysis. {len(data_files) - next_index - 1} files still remaining ",
                 flush=True,
             )
 
