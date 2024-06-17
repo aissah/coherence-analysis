@@ -57,7 +57,7 @@ def _next_data_window(data_files, next_index, averaging_window_length, samples_p
         index of the next file to read data from
     stop_sample_index : int
         index we stopped reading data from file "next_index"
-        
+
     """
 
     num_files = len(data_files)
@@ -67,13 +67,13 @@ def _next_data_window(data_files, next_index, averaging_window_length, samples_p
         first_channel : channel_offset
         + first_channel : int(channel_offset / num_channels), start_sample_index : start_sample_index + total_window_length
     ]
+    stop_sample_index = total_window_length # index we stopped reading data from file "next_index"
+
     # number of samples to add to the data to make up the window length
     window_deficit = total_window_length - data.shape[1]
     
-    next_index += 1 # index of the next file to read data from
-    stop_sample_index = 0 # index we stopped reading data from file "next_index"
-
-    while window_deficit > 0 and next_index < num_files:
+    while window_deficit > 0 and next_index < num_files - 1:
+        next_index += 1 # index of the next file to read data from
         next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
         next_data = next_data[
             first_channel : channel_offset
@@ -85,8 +85,10 @@ def _next_data_window(data_files, next_index, averaging_window_length, samples_p
 
         if window_deficit < next_data.shape[1]:
             stop_sample_index = window_deficit
-        else:
+        elif window_deficit == next_data.shape[1]:
             next_index += 1
+            stop_sample_index = 0
+        
         window_deficit = total_window_length - data.shape[1]
         
     return data, next_index, stop_sample_index
@@ -194,7 +196,7 @@ if __name__ == "__main__":
     #     len_data = data.shape[1] / samples_per_sec
     #     next_index += 1
 
-    data, next_index = _next_data_window(
+    data, next_index, stop_sample_index = _next_data_window(
         data_files, next_index, averaging_window_length, samples_per_sec
     )
 
@@ -242,8 +244,8 @@ if __name__ == "__main__":
         #     len_data = data.shape[1] / samples_per_sec
         #     next_index += 1
 
-        data, next_index = _next_data_window(
-            data_files, next_index, averaging_window_length, samples_per_sec
+        data, next_index, stop_sample_index = _next_data_window(
+            data_files, next_index, averaging_window_length, samples_per_sec, stop_sample_index
         )
 
         # preceding_data = data[:, -overlap * samples_per_sec :]
