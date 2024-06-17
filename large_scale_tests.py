@@ -98,7 +98,7 @@ def _next_data_window(
 
         if window_deficit < next_data.shape[1]:
             stop_sample_index = window_deficit
-        elif window_deficit == next_data.shape[1]:
+        elif window_deficit == next_data.shape[1] or next_index == num_files - 1:
             next_index += 1
             stop_sample_index = 0
 
