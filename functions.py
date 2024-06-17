@@ -250,8 +250,12 @@ def power_iteration(A, tol=1e-6, max_iter=1000):
     n = A.shape[0]
     x = np.random.rand(n)
     for i in range(max_iter):
-        x = A @ x
-        x = x / np.linalg.norm(x)
+        new_x = A @ x
+        new_x = new_x / np.linalg.norm(new_x)
+        if np.linalg.norm(new_x - x) < tol:
+            x = new_x
+            break
+        x = new_x
     return x @ A @ x
 
 
