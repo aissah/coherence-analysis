@@ -47,6 +47,27 @@ def windowed_spectra(
 ):
     """
     Calculate the frequency domain representation of data in windows.
+
+    Parameters
+    ----------
+    data : numpy array
+        DESCRIPTION. Data in time domain
+    subwindow_len : int
+        DESCRIPTION. Length of the subwindows in seconds
+    overlap : int
+        DESCRIPTION. Overlap between adjacent subwindows in seconds
+    freq : int, optional
+        DESCRIPTION. Frequency to return the spectra at. The default is None. If None, the spectra is returned at all frequencies
+    sample_interval : float, optional
+        DESCRIPTION. Sample interval of the data. The default is 1.
+
+    Returns
+    -------
+    win_spectra : numpy array
+        DESCRIPTION. Spectra of the data in windows
+    frequencies : numpy array
+        DESCRIPTION. Frequencies at which the spectra is computed
+        
     """
 
     win_start = 0
@@ -79,6 +100,24 @@ def normalised_windowed_spectra(
 ):
     """
     Calculate the frequency domain representation of data in windows.
+
+    Parameters
+    ----------
+    data : numpy array
+        DESCRIPTION. Data in time domain
+    subwindow_len : int
+        DESCRIPTION. Length of the subwindows in seconds
+    overlap : int
+        DESCRIPTION. Overlap between adjacent subwindows in seconds
+    freq : int, optional
+        DESCRIPTION. Frequency to return the spectra at. The default is None. If None, the spectra is returned at all frequencies
+    sample_interval : float, optional
+        DESCRIPTION. Sample interval of the data. The default is 1.
+
+    Returns
+    -------
+    normalized_spectra : numpy array
+        DESCRIPTION. Normalized spectra of the data. The normalization is done by dividing the spectra by the sum of the absolute values of the spectra squared of each channel
     """
 
     win_spectra, frequencies = windowed_spectra(
@@ -98,8 +137,30 @@ def welch_coherence(
     data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
 ):
     """
+
     Calculate the coherence matrix at all (or particular frequencies: yet to be implemented)
     using the welch method.
+
+    Parameters
+    ----------
+    data : numpy array
+        DESCRIPTION. Data in time for coherence analysis
+    subwindow_len : int
+        DESCRIPTION. Length of the subwindows in seconds
+    overlap : int
+        DESCRIPTION. Overlap between adjacent subwindows in seconds
+    freq : int, optional
+        DESCRIPTION. Frequency to compute the coherence at. The default is None. If None, the coherence is computed at all frequencies
+    sample_interval : float, optional
+        DESCRIPTION. Sample interval of the data. The default is 1.
+
+    Returns
+    -------
+    coherence : numpy array
+        DESCRIPTION. Coherence matrix of the data
+    frequencies : numpy array
+        DESCRIPTION. Frequencies at which the coherence is computed
+
     """
     win_spectra, frequencies = windowed_spectra(
         data, subwindow_len, overlap, freq, sample_interval
@@ -127,7 +188,31 @@ def exact_coherence(
     sample_interval=1,
 ):
     """
-    Compute the k largest eigenvalues of A using the randomized SVD method
+
+    Compute the detection significance from coherence of data using the exact method.
+    The detection significance is the ratio of the largest eigenvalue to the sum of all eigenvalues.
+    This method computes the coherence matrix using the Welch method, and then computes the eigenvalues and subsequent detection significance at all frequencies.
+
+    Parameters
+    ----------
+    data : numpy array
+        DESCRIPTION. Data in time for coherence analysis.
+    subwindow_len : int
+        DESCRIPTION. Length of the subwindows in seconds.
+    overlap : int, optional
+        DESCRIPTION. Overlap between adjacent subwindows in seconds. The default is 0.
+    resolution : float, optional
+        DESCRIPTION. Resolution of the detection significance from 0 to 1. The default is 0.1.
+    sample_interval : float, optional
+        DESCRIPTION. Sample interval of the data. The default is 1.
+
+    Returns
+    -------
+    detection_significance : numpy array
+        DESCRIPTION. Detection significance of the data based on coherence computed using the exact method
+    eigenvalss : numpy array
+        DESCRIPTION. Eigenvalues of the coherence matrix
+
     """
     coherence, _ = welch_coherence(
         data, subwindow_len, overlap, sample_interval=sample_interval
@@ -153,7 +238,25 @@ def exact_coherence(
 
 def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
     """
-    Compute the k largest eigenvalues of A using the randomized SVD method
+
+    Compute the detection significance from coherence of data using an SVD approximation.
+    The detection significance is the ratio of the largest eigenvalue to the sum of all eigenvalues.
+    This method computes the coherence matrix from the normalised spectra matrix provided, and then approximates the eigenvalues and subsequent detection significance at all frequencies using SVD.
+
+    Parameters
+    ----------
+    norm_win_spectra : numpy array
+        DESCRIPTION. Normalized windowed spectra
+    resolution : float, optional
+        DESCRIPTION. Resolution of the detection significance from 0 to 1. The default is 0.1.
+
+    Returns
+    -------
+    detection_significance : numpy array
+        DESCRIPTION. Detection significance of the data based on coherence computed using the SVD method
+    svd_approxs : numpy array
+        DESCRIPTION. Approximation of the eigenvalues of the data using the SVD method
+
     """
     num_frames = norm_win_spectra.shape[0]
     num_frames = int(num_frames * resolution)
@@ -176,7 +279,25 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
 
 def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
     """
-    Approximate the coherence of A using the QR decompositon
+
+    Compute the detection significance from coherence of data using a QR decomposition approximation.
+    The detection significance is the ratio of the largest eigenvalue to the sum of all eigenvalues.
+    This method computes the coherence matrix from the normalised spectra matrix provided, and then approximates the eigenvalues and subsequent detection significance at all frequencies using QR decomposition.
+
+    Parameters
+    ----------
+    norm_win_spectra : numpy array
+        DESCRIPTION. Normalized windowed spectra
+    resolution : float, optional
+        DESCRIPTION. Resolution of the detection significance from 0 to 1. The default is 0.1.
+
+    Returns
+    -------
+    detection_significance : numpy array
+        DESCRIPTION. Detection significance of the data based on coherence computed using the QR decomposition
+    qr_approxs : numpy array
+        DESCRIPTION. Approximation of the eigenvalues of the data using the QR decomposition
+
     """
     num_frames = norm_win_spectra.shape[0]
     num_frames = int(num_frames * resolution)
@@ -205,7 +326,26 @@ def rsvd_coherence(
     norm_win_spectra: np.ndarray, resolution: int = 0.1, approx_rank: int = None
 ):
     """
-    Compute the k largest eigenvalues of A using the randomized SVD method
+    Compute the detection significance from coherence of data using a randomized SVD approximation.
+    The detection significance is the ratio of the largest eigenvalue to the sum of all eigenvalues.
+    This method computes the coherence matrix from the normalised spectra matrix provided, and then approximates the eigenvalues and subsequent detection significance at all frequencies using randomized SVD.
+
+    Parameters
+    ----------
+    norm_win_spectra : numpy array
+        DESCRIPTION. Normalized windowed spectra
+    resolution : float, optional
+        DESCRIPTION. Resolution of the detection significance from 0 to 1. The default is 0.1.
+    approx_rank : int, optional
+        DESCRIPTION. Approximate rank for the randomized SVD method. The default is None.
+
+    Returns
+    -------
+    detection_significance : numpy array
+        DESCRIPTION. Detection significance of the data based on coherence computed using the randomized SVD method
+    rsvd_approxs : numpy array
+        DESCRIPTION. Approximation of the eigenvalues of the data using the randomized SVD method
+
     """
     from sklearn.utils.extmath import randomized_svd
 
@@ -232,6 +372,21 @@ def rsvd_coherence(
 def qr_iteration(A, tol=1e-6, max_iter=1000):
     """
     Compute the eigenvalues of A using the QR iteration method
+
+    Parameters
+    ----------
+    A : numpy array
+        DESCRIPTION. Matrix to compute the eigenvalues of
+    tol : float, optional
+        DESCRIPTION. Tolerance for convergence. The default is 1e-6.
+    max_iter : int, optional
+        DESCRIPTION. Maximum number of iterations. The default is 1000.
+
+    Returns
+    -------
+    numpy array
+        DESCRIPTION. Eigenvalues of A
+
     """
     n = A.shape[0]
     Q = np.eye(n)
@@ -246,6 +401,21 @@ def qr_iteration(A, tol=1e-6, max_iter=1000):
 def power_iteration(A, tol=1e-6, max_iter=1000):
     """
     Compute the eigenvalues of A using the power iteration method
+
+    Parameters
+    ----------
+    A : numpy array
+        DESCRIPTION. Matrix to compute the eigenvalues of
+    tol : float, optional
+        DESCRIPTION. Tolerance for convergence. The default is 1e-6.
+    max_iter : int, optional
+        DESCRIPTION. Maximum number of iterations. The default is 1000.
+
+    Returns
+    -------
+    float
+        DESCRIPTION. Largest eigenvalue of A
+
     """
     n = A.shape[0]
     x = np.random.rand(n)
