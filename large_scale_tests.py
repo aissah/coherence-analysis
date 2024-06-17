@@ -29,12 +29,18 @@ import numpy as np
 import functions as func
 
 
-def _next_data_window(data_files, next_index, averaging_window_length, samples_per_sec, start_sample_index=0):
+def _next_data_window(
+    data_files,
+    next_index,
+    averaging_window_length,
+    samples_per_sec,
+    start_sample_index=0,
+):
     """
     Load the next data window from the data files. This function is used to load the next window of data
-    from the data files. It reads the data from the next file in the list of data files and appends it to the
-    data from the previous file. It continues to read data from the files until the window length is reached.
-    The function returns the data and the index of the next file to read data from.
+    from the list of data files. It continues to read data from the files until the window length is reached.
+    The function returns the data, the index of the next file to read data from, and the index with the file
+    at which we stopped reading.
 
     Parameters
     ----------
@@ -66,10 +72,13 @@ def _next_data_window(data_files, next_index, averaging_window_length, samples_p
     data_len = data.shape[1]
     data = data[
         first_channel : channel_offset
-        + first_channel : int(channel_offset / num_channels), start_sample_index : start_sample_index + total_window_length
+        + first_channel : int(channel_offset / num_channels),
+        start_sample_index : start_sample_index + total_window_length,
     ]
-    
-    stop_sample_index = start_sample_index + total_window_length # index we stopped reading data from file "next_index"
+
+    stop_sample_index = (
+        start_sample_index + total_window_length
+    )  # index we stopped reading data from file "next_index"
 
     # number of samples to add to the data to make up the window length
     window_deficit = total_window_length - data.shape[1]
@@ -77,26 +86,24 @@ def _next_data_window(data_files, next_index, averaging_window_length, samples_p
     if window_deficit == 0 and stop_sample_index == data_len:
         next_index += 1
         stop_sample_index = 0
-    
+
     while window_deficit > 0 and next_index < num_files - 1:
-        next_index += 1 # index of the next file to read data from
+        next_index += 1  # index of the next file to read data from
         next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
         next_data = next_data[
             first_channel : channel_offset
             + first_channel : int(channel_offset / num_channels)
         ]
-        data = np.append(
-            data, next_data[:, : window_deficit], axis=1
-        )
+        data = np.append(data, next_data[:, :window_deficit], axis=1)
 
         if window_deficit < next_data.shape[1]:
             stop_sample_index = window_deficit
         elif window_deficit == next_data.shape[1]:
             next_index += 1
             stop_sample_index = 0
-        
+
         window_deficit = total_window_length - data.shape[1]
-        
+
     return data, next_index, stop_sample_index
 
 
@@ -251,7 +258,11 @@ if __name__ == "__main__":
         #     next_index += 1
 
         data, next_index, stop_sample_index = _next_data_window(
-            data_files, next_index, averaging_window_length, samples_per_sec, stop_sample_index
+            data_files,
+            next_index,
+            averaging_window_length,
+            samples_per_sec,
+            stop_sample_index,
         )
 
         # preceding_data = data[:, -overlap * samples_per_sec :]
@@ -289,8 +300,10 @@ if __name__ == "__main__":
 
             eig_estimatess = np.append(eig_estimatess, eig_estimates, axis=1)
         else:
-            print(f"Data length of {data.shape[1]} not the expected {averaging_window_length * samples_per_sec} for analysis. {len(data_files) - next_index} files still remaining ", flush=True)
-
+            print(
+                f"Data length of {data.shape[1]} not the expected {averaging_window_length * samples_per_sec} for analysis. {len(data_files) - next_index} files still remaining ",
+                flush=True,
+            )
 
     print(
         f"Finished in: {datetime.now()-start_time} for {method} method. Saving to file...",

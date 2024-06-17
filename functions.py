@@ -266,6 +266,7 @@ def coherence(
 ):
     """
     Compute the detection significance from coherence of data using the specified method.
+
     Parameters
     ----------
     data : numpy array
@@ -282,10 +283,12 @@ def coherence(
         DESCRIPTION. Method to use for coherence analysis. The default is 'exact'. Options are: 'exact', 'qr', 'svd', 'rsvd', 'power', 'qr iteration'
     approx_rank : int, optional
         DESCRIPTION. Approximate rank for the randomized SVD method. The default is 10.
+
     Returns
     -------
     detection_significance : numpy array
         DESCRIPTION. Detection significance of the coherence of the data computed using the specified method
+
     Example
     --------
     data = np.random.rand(100, 1000)
