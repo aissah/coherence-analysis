@@ -63,14 +63,20 @@ def _next_data_window(data_files, next_index, averaging_window_length, samples_p
     num_files = len(data_files)
     total_window_length = averaging_window_length * samples_per_sec
     data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
+    data_len = data.shape[1]
     data = data[
         first_channel : channel_offset
         + first_channel : int(channel_offset / num_channels), start_sample_index : start_sample_index + total_window_length
     ]
-    stop_sample_index = total_window_length # index we stopped reading data from file "next_index"
+    
+    stop_sample_index = start_sample_index + total_window_length # index we stopped reading data from file "next_index"
 
     # number of samples to add to the data to make up the window length
     window_deficit = total_window_length - data.shape[1]
+
+    if window_deficit == 0 and stop_sample_index == data_len:
+        next_index += 1
+        stop_sample_index = 0
     
     while window_deficit > 0 and next_index < num_files - 1:
         next_index += 1 # index of the next file to read data from
