@@ -29,27 +29,38 @@ import numpy as np
 import functions as func
 
 
-def _next_data_window(data_files, next_index, averaging_window_length, samples_per_sec):
+def _next_data_window(data_files, next_index, averaging_window_length, samples_per_sec, start_sample_index=0):
+
     num_files = len(data_files)
+    total_window_length = averaging_window_length * samples_per_sec
     data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
     data = data[
         first_channel : channel_offset
-        + first_channel : int(channel_offset / num_channels)
+        + first_channel : int(channel_offset / num_channels), start_sample_index : start_sample_index + total_window_length
     ]
-    len_data = data.shape[1] / samples_per_sec
-    next_index += 1
-    while len_data < averaging_window_length and next_index < num_files:
+    # number of samples to add to the data to make up the window length
+    window_deficit = total_window_length - data.shape[1]
+    
+    next_index += 1 # index of the next file to read data from
+    stop_sample_index = 0 # index we stopped reading data from file "next_index"
+
+    while window_deficit > 0 and next_index < num_files:
         next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
         next_data = next_data[
             first_channel : channel_offset
             + first_channel : int(channel_offset / num_channels)
         ]
         data = np.append(
-            data, next_data[:, : averaging_window_length * samples_per_sec], axis=1
+            data, next_data[:, : window_deficit], axis=1
         )
-        len_data = data.shape[1] / samples_per_sec
-        next_index += 1
-    return data, next_index
+
+        if window_deficit < next_data.shape[1]:
+            stop_sample_index = window_deficit
+        else:
+            next_index += 1
+        window_deficit = total_window_length - data.shape[1]
+        
+    return data, next_index, stop_sample_index
 
 
 if __name__ == "__main__":
@@ -213,33 +224,36 @@ if __name__ == "__main__":
         #     first_channel : channel_offset
         #     + first_channel : int(channel_offset / num_channels)
         # ]
-
-        detection_significance, eig_estimates = func.coherence(
-            data,
-            sub_window_length,
-            overlap,
-            sample_interval=1 / samples_per_sec,
-            method=method,
-        )
-
-        # if method == 'qr':
-        #     detection_significance, eig_estimates = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-        # else: # elif method in METHODS:
-        #     detection_significance = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-
-        if detection_significance.shape == detection_significances.shape:
-            detection_significances = np.append(
-                detection_significances[np.newaxis],
-                detection_significance[np.newaxis],
-                axis=0,
+        if data.shape[1] == averaging_window_length * samples_per_sec:
+            detection_significance, eig_estimates = func.coherence(
+                data,
+                sub_window_length,
+                overlap,
+                sample_interval=1 / samples_per_sec,
+                method=method,
             )
-            # eig_estimatess = np.append(eig_estimatess[np.newaxis], eig_estimates[np.newaxis], axis=0)
+
+            # if method == 'qr':
+            #     detection_significance, eig_estimates = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+            # else: # elif method in METHODS:
+            #     detection_significance = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
+
+            if detection_significance.shape == detection_significances.shape:
+                detection_significances = np.append(
+                    detection_significances[np.newaxis],
+                    detection_significance[np.newaxis],
+                    axis=0,
+                )
+                # eig_estimatess = np.append(eig_estimatess[np.newaxis], eig_estimates[np.newaxis], axis=0)
+            else:
+                detection_significances = np.append(
+                    detection_significances, detection_significance[np.newaxis], axis=0
+                )
+
+            eig_estimatess = np.append(eig_estimatess, eig_estimates, axis=1)
         else:
-            detection_significances = np.append(
-                detection_significances, detection_significance[np.newaxis], axis=0
-            )
+            print(f"Data length of {data.shape[1]} not the expected {averaging_window_length * samples_per_sec} for analysis. {len(data_files) - next_index} files still remaining ", flush=True)
 
-        eig_estimatess = np.append(eig_estimatess, eig_estimates, axis=1)
 
     print(
         f"Finished in: {datetime.now()-start_time} for {method} method. Saving to file...",
