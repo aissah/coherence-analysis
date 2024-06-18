@@ -313,25 +313,34 @@ if __name__ == "__main__":
 
     # save the results of detection significance, eigenvalues, and metadata to different files
     # save_data = {'detection_significance': detection_significances, 'metadata': metadata}
-    savename = (
-        save_location
-        / f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    )
+    # savename = (
+    #     save_location
+    #     / f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
+    # )
+    savename = os.path.join(
+        save_location,
+        f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl")
     with open(savename, "wb") as f:
         pickle.dump(detection_significances, f)
 
     # save_data = {'eig_estimates': eig_estimatess, 'metadata': metadata}
-    savename = (
-        save_location
-        / f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    )
+    # savename = (
+    #     save_location
+    #     / f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
+    # )
+    savename = os.path.join(
+        save_location,
+        f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl")
     with open(savename, "wb") as f:
         pickle.dump(eig_estimatess, f)
 
-    savename = (
-        save_location
-        / f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    )
+    # savename = (
+    #     save_location
+    #     / f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
+    # )
+    savename = os.path.join(
+        save_location,
+        f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl")
     with open(savename, "wb") as f:
         pickle.dump(metadata, f)
 
