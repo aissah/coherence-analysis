@@ -172,6 +172,7 @@ if __name__ == "__main__":
     if batch == 1:
         first_file_time = data_files[0][-15:-3]
         data_files = data_files[:batch_size]
+        metadata["files"] = [a[-15:-3] for a in data_files]
         # data, _ = func.loadBradyHShdf5(data_files[0], normalize="no")
         # # data = data[first_channel:last_channel]
         # data = data[
