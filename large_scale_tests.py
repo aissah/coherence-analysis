@@ -302,7 +302,7 @@ if __name__ == "__main__":
             eig_estimatess = np.append(eig_estimatess, eig_estimates, axis=1)
         else:
             print(
-                f"Data length of {data.shape[1]} not the expected {averaging_window_length * samples_per_sec} for analysis. {len(data_files) - next_index - 1} files still remaining ",
+                f"Data length of {data.shape[1]} not the expected {averaging_window_length * samples_per_sec} for analysis. {len(data_files) - next_index} files still remaining ",
                 flush=True,
             )
 
