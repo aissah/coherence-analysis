@@ -245,7 +245,7 @@ def exact_coherence(
     return detection_significance, eigenvalss
 
 
-def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
+def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     """
 
     Compute the detection significance from coherence of data using an SVD approximation.
@@ -275,7 +275,7 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
     num_frames = int(num_frames * resolution)
 
     # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
-    num_frames = int(num_frames * 3 / 5)
+    num_frames = int(num_frames * 2 / 5)
 
     num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
@@ -290,7 +290,7 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
     return detection_significance, svd_approxs
 
 
-def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
+def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     """
 
     Compute the detection significance from coherence of data using a QR decomposition
@@ -319,7 +319,7 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
     num_frames = int(num_frames * resolution)
 
     # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
-    num_frames = int(num_frames * 3 / 5)
+    num_frames = int(num_frames * 2 / 5)
 
     num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
@@ -339,7 +339,7 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 0.1):
 
 
 def rsvd_coherence(
-    norm_win_spectra: np.ndarray, resolution: int = 0.1, approx_rank: int = None
+    norm_win_spectra: np.ndarray, resolution: int = 1, approx_rank: int = None
 ):
     """
     Compute the detection significance from coherence of data using a randomized SVD approximation.
@@ -372,7 +372,7 @@ def rsvd_coherence(
     num_frames = int(num_frames * resolution)
 
     # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
-    num_frames = int(num_frames * 3 / 5)
+    num_frames = int(num_frames * 2 / 5)
 
     if approx_rank is None:
         approx_rank = norm_win_spectra.shape[2]
