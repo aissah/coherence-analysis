@@ -4,6 +4,7 @@ import numpy as np
 
 def loadBradyHShdf5(file, normalize="yes"):
     """
+    Load brady hotspring h5py data file and return the data and timestamps.
 
     Parameters
     ----------
@@ -46,6 +47,7 @@ def windowed_spectra(
     data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
 ):
     """
+
     Calculate the frequency domain representation of data in windows.
 
     Parameters
@@ -99,8 +101,12 @@ def windowed_spectra(
 def normalised_windowed_spectra(
     data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
 ):
+    win_spectra, frequencies = windowed_spectra(
+        data, subwindow_len, overlap, freq, sample_interval
+    )
     """
-    Calculate the frequency domain representation of data in windows.
+    Calculate the normalized frequency domain representation of data in
+    windows.
 
     Parameters
     ----------
@@ -120,8 +126,11 @@ def normalised_windowed_spectra(
     -------
     normalized_spectra : numpy array
         DESCRIPTION. Normalized spectra of the data. The normalization is done
-        by dividing the spectra by the sum of the absolute values of the spectra
-        squared of each channel
+        by dividing the spectra by the sum of the absolute values of the
+        spectra squared of each channel
+    frequencies : numpy array
+        DESCRIPTION. Frequencies at which the spectra is computed
+
     """
 
     win_spectra, frequencies = windowed_spectra(
@@ -154,8 +163,8 @@ def welch_coherence(
     overlap : int
         DESCRIPTION. Overlap between adjacent subwindows in seconds
     freq : int, optional
-        DESCRIPTION. Frequency to compute the coherence at. The default is None.
-        If None, the coherence is computed at all frequencies
+        DESCRIPTION. Frequency to compute the coherence at. The default is
+        None. If None, the coherence is computed at all frequencies
     sample_interval : float, optional
         DESCRIPTION. Sample interval of the data. The default is 1.
 
