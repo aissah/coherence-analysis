@@ -80,9 +80,9 @@ def _next_data_window(
     data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
     data_len = data.shape[1]
     data = data[
-        first_channel : channel_offset
-        + first_channel : int(channel_offset / num_channels),
-        start_sample_index : start_sample_index + total_window_length,
+        first_channel: channel_offset
+        + first_channel: int(channel_offset / num_channels),
+        start_sample_index: start_sample_index + total_window_length,
     ]
 
     stop_sample_index = (
@@ -100,14 +100,14 @@ def _next_data_window(
         next_index += 1  # index of the next file to read data from
         next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
         next_data = next_data[
-            first_channel : channel_offset
-            + first_channel : int(channel_offset / num_channels)
+            first_channel: channel_offset
+            + first_channel: int(channel_offset / num_channels)
         ]
         data = np.append(data, next_data[:, :window_deficit], axis=1)
 
         if window_deficit < next_data.shape[1]:
             stop_sample_index = window_deficit
-        elif window_deficit == next_data.shape[1] or next_index == num_files - 1:
+        elif window_deficit == next_data.shape[1] or next_index == num_files-1:
             next_index += 1
             stop_sample_index = 0
 
@@ -124,9 +124,12 @@ if __name__ == "__main__":
     METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
 
     # Take inputs from the command line
-    data_basepath = sys.argv[1]  # Path to the directory containing the data files
-    # save_location = sys.argv[12]  # Path to the directory where the results will be saved
-    averaging_window_length = int(sys.argv[2])  # Averaging window length in seconds
+    # Path to the directory containing the data files
+    data_basepath = sys.argv[1]
+    # Path to the directory where the results will be saved
+    # save_location = sys.argv[12]
+    # Averaging window length in seconds
+    averaging_window_length = int(sys.argv[2])
     sub_window_length = int(sys.argv[3])  # sub-window length in seconds
     overlap = int(sys.argv[4])  # overlap in seconds
     first_channel = int(sys.argv[5])  # first channel
@@ -136,21 +139,24 @@ if __name__ == "__main__":
     )  # Number of channels to subselect from the range of channels
     samples_per_sec = int(sys.argv[8])  # samples per second
     method = sys.argv[9]  # method to use for coherence analysis
-    batch = int(
-        sys.argv[10]
-    )  # Batch of files assuming jobs are run in parallel for files in batches. Should be one if that is not the case.
-    batch_size = int(
-        sys.argv[11]
-    )  # Number of files in batch. Should be 0 or number of files being considered if job is not done in batches.
+    # Batch of files assuming jobs are run in parallel for files in batches.
+    # Should be one if that is not the case.
+    batch = int(sys.argv[10])
+    # Number of files in batch. Should be 0 or number of files being
+    # considered if job is not done in batches.
+    batch_size = int(sys.argv[11])
 
     # Path to the directory containing the data files
-    # data_basepath = "/beegfs/projects/martin/BradyHotspring"  # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
+    # data_basepath = "/beegfs/projects/martin/BradyHotspring"
+    # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
 
     # Path to the directory where the results will be saved
-    save_location = "/u/st/by/aissah/scratch/coherence/coherence_test_results"  # "D:/CSM/Mines_Research/Test_data/"
+    save_location = "/u/st/by/aissah/scratch/coherence/coherence_test_results"
+    # "D:/CSM/Mines_Research/Test_data/"
 
-    # Get the file names of the data files by going through the folders contained
-    # in the base path and putting together the paths to files ending in .h5
+    # Get the file names of the data files by going through the folders
+    # contained in the base path and putting together the paths to files 
+    # ending in .h5
     data_files = []
     for dir_path, dir_names, file_names in os.walk(data_basepath):
         dir_names.sort()
@@ -223,9 +229,9 @@ if __name__ == "__main__":
         data_files, next_index, averaging_window_length, samples_per_sec
     )
 
-    # work on files after first file in batch. This works exactly as we handled the
-    # beginning of later batches. Then we keep appending to the variables set up for
-    # first file of the batch above
+    # work on files after first file in batch. This works exactly as we
+    # handled the beginning of later batches. Then we keep appending to
+    # the variables set up for first file of the batch above
     if method in METHODS:
         detection_significances, eig_estimatess = func.coherence(
             data,
@@ -235,7 +241,8 @@ if __name__ == "__main__":
             method=method,
         )
     else:
-        raise ValueError(f"Method {method} not available for coherence analysis")
+        raise ValueError(f"Method {method} not available"
+                         " for coherence analysis")
 
     # if method == 'qr':
     #     detection_significances, eig_estimatess = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
@@ -311,13 +318,15 @@ if __name__ == "__main__":
             eig_estimatess = np.append(eig_estimatess, eig_estimates, axis=1)
         else:
             print(
-                f"Data length of {data.shape[1]} not the expected {averaging_window_length * samples_per_sec} for analysis. {len(data_files) - next_index} files still remaining ",
+                f"Data length of {data.shape[1]} not the expected"
+                 " {averaging_window_length * samples_per_sec} for analysis."
+                  " {len(data_files) - next_index} files still remaining ",
                 flush=True,
             )
 
     print(
-        f"Finished in: {datetime.now()-start_time} for {method} method. Saving to file...",
-        flush=True,
+        f"Finished in: {datetime.now()-start_time} for {method} method."
+         " Saving to file...", flush=True,
     )
 
     # save the results of detection significance, eigenvalues, and metadata to different files
