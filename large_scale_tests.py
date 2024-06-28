@@ -80,9 +80,9 @@ def _next_data_window(
     data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
     data_len = data.shape[1]
     data = data[
-        first_channel: channel_offset
-        + first_channel: int(channel_offset / num_channels),
-        start_sample_index: start_sample_index + total_window_length,
+        first_channel : channel_offset
+        + first_channel : int(channel_offset / num_channels),
+        start_sample_index : start_sample_index + total_window_length,
     ]
 
     stop_sample_index = (
@@ -100,14 +100,14 @@ def _next_data_window(
         next_index += 1  # index of the next file to read data from
         next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
         next_data = next_data[
-            first_channel: channel_offset
-            + first_channel: int(channel_offset / num_channels)
+            first_channel : channel_offset
+            + first_channel : int(channel_offset / num_channels)
         ]
         data = np.append(data, next_data[:, :window_deficit], axis=1)
 
         if window_deficit < next_data.shape[1]:
             stop_sample_index = window_deficit
-        elif window_deficit == next_data.shape[1] or next_index == num_files-1:
+        elif window_deficit == next_data.shape[1] or next_index == num_files - 1:
             next_index += 1
             stop_sample_index = 0
 
@@ -213,8 +213,7 @@ if __name__ == "__main__":
             method=method,
         )
     else:
-        raise ValueError(f"Method {method} not available"
-                         " for coherence analysis")
+        raise ValueError(f"Method {method} not available" " for coherence analysis")
 
     end_time = datetime.now()
     print(f"First file completed in: {end_time - start_time}", flush=True)
@@ -260,7 +259,8 @@ if __name__ == "__main__":
 
     print(
         f"Finished in: {datetime.now()-start_time} for {method} method."
-        " Saving to file...", flush=True,
+        " Saving to file...",
+        flush=True,
     )
 
     # save the results of detection significance, eigenvalues, and metadata to
