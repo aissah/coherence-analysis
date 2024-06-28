@@ -90,8 +90,7 @@ def windowed_spectra(
         win_start = win_end - overlap
         win_end = win_start + window_samples
         absolute_spectra = np.fft.rfft(data[:, win_start:win_end])
-        win_spectra = np.append(win_spectra, absolute_spectra[np.newaxis],
-                                axis=0)
+        win_spectra = np.append(win_spectra, absolute_spectra[np.newaxis], axis=0)
         # win_start = win_end
 
     frequencies = np.fft.rfftfreq(window_samples, sample_interval)
@@ -187,8 +186,7 @@ def welch_coherence(
     normalizer = normalizer.transpose(2, 1, 0)
 
     welch_numerator = np.matmul(
-        win_spectra.transpose(2, 1, 0),
-        np.conjugate(win_spectra.transpose(2, 0, 1))
+        win_spectra.transpose(2, 1, 0), np.conjugate(win_spectra.transpose(2, 0, 1))
     )
     welch_numerator = np.absolute(welch_numerator) ** 2
     coherence = np.multiply(welch_numerator, 1 / normalizer)
@@ -350,7 +348,7 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
 
     for d in range(num_frames):
         _, R = np.linalg.qr(norm_win_spectra[d * int(1 / resolution)])
-        qr_approx = np.diag(R@np.conjugate(R.transpose()))
+        qr_approx = np.diag(R @ np.conjugate(R.transpose()))
         sorted_qr_approx = np.sort(qr_approx)[::-1]
         print(sorted_qr_approx.shape, flush=True)
         detection_significance[d] = sorted_qr_approx[0] / np.sum(
@@ -551,5 +549,4 @@ def coherence(
     elif method == "qr iteration":
         return qr_iteration(data, tol=1e-6, max_iter=1000)
     else:
-        raise ValueError(f"Invalid method: {method}."
-                         f"Valid methods are: {METHODS}")
+        raise ValueError(f"Invalid method: {method}." f"Valid methods are: {METHODS}")

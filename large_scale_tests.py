@@ -1,8 +1,11 @@
 """
-This python file is to test coherence analyses for a larger dataset. The was written for some 
-data from Brady Geothermal DAS experiment and is in hdf5 format. Can be ran as:
+This python file is to test coherence analyses for a larger dataset. The was
+written for some data from Brady Geothermal DAS experiment and is in hdf5
+format. Can be ran as:
 TO DO: Add output directory as an argument
-python large_scale_test.py <data_location> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <channel_offset> <num_channels> <samples_per_sec> <method> <batch> <batch_size>
+python large_scale_test.py <data_location> <averaging_window_length>
+    <sub_window_length> <overlap> <first_channel> <channel_offset>
+        <num_channels> <samples_per_sec> <method> <batch> <batch_size>
 - data_location: path to the directory containing the data files
 - averaging_window_length: Averaging window length in seconds
 - sub_window_length: sub-window length in seconds
@@ -12,13 +15,18 @@ python large_scale_test.py <data_location> <averaging_window_length> <sub_window
 - samples_per_sec: samples per second
 - channel_offset: channel offset
 - method: method to use for coherence analysis
-- batch: Batch of files assuming jobs are run in parallel for files in batches. Should be one if that is not the case.
-- batch_size: Number of files in batch. Should be number of files being considered if job is not done in batches.
-The script will then go through the files in the batch and perform coherence analysis on the data.
-The results are saved to a file for later analysis.
+- batch: Batch of files assuming jobs are run in parallel for files in batches.
+    Should be one (1) if that is not the case.
+- batch_size: Number of files in batch. Should be number of files being
+    considered if job is not done in batches.
+The script will then go through the files in the batch and perform coherence
+analysis on the data. The results are saved to a file for later analysis.
 Example:
-- python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0 3100 2000 200 1000 exact 1 0
+- python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0
+    3100 2000 200 1000 exact 1 0
+
 """
+
 import os
 import pickle
 import sys
@@ -37,10 +45,11 @@ def _next_data_window(
     start_sample_index=0,
 ):
     """
-    Load the next data window from the data files. This function is used to load the next window of data
-    from the list of data files. It continues to read data from the files until the window length is reached.
-    The function returns the data, the index of the next file to read data from, and the index with the file
-    at which we stopped reading.
+    Load the next data window from the data files. This function is used to
+    load the next window of data from the list of data files. It continues
+    to read data from the files until the window length is reached. The
+    function returns the data, the index of the next file to read data from,
+    and the index with the file at which we stopped reading.
 
     Parameters
     ----------
@@ -239,7 +248,7 @@ if __name__ == "__main__":
     print(f"First file completed in: {end_time - start_time}", flush=True)
 
     # for a in data_files[1:]:
-    while next_index < len(data_files)-1:
+    while next_index < len(data_files) - 1:
         # data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
         # data = data[
         #     first_channel : channel_offset
@@ -319,7 +328,8 @@ if __name__ == "__main__":
     # )
     savename = os.path.join(
         save_location,
-        f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl")
+        f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
+    )
     with open(savename, "wb") as f:
         pickle.dump(detection_significances, f)
 
@@ -330,7 +340,8 @@ if __name__ == "__main__":
     # )
     savename = os.path.join(
         save_location,
-        f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl")
+        f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
+    )
     with open(savename, "wb") as f:
         pickle.dump(eig_estimatess, f)
 
@@ -340,7 +351,8 @@ if __name__ == "__main__":
     # )
     savename = os.path.join(
         save_location,
-        f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl")
+        f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
+    )
     with open(savename, "wb") as f:
         pickle.dump(metadata, f)
 
