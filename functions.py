@@ -336,7 +336,7 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
         decomposition
 
     """
-    print("QR COHERENCE", flush=True)
+
     num_frames = norm_win_spectra.shape[0]
     num_frames = int(num_frames * resolution)
 
@@ -356,7 +356,6 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
         detection_significance[d] = sorted_qr_approx[0] / np.sum(
             np.absolute(sorted_qr_approx)
         )
-        print(qr_approxs.shape, qr_approx.shape, flush=True)
         qr_approxs[d] = qr_approx
 
     return detection_significance, qr_approxs
@@ -525,7 +524,7 @@ def coherence(
     """
 
     METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
-    print(f"Method: {method}", flush=True)
+
     if method == "exact":
         return exact_coherence(
             data, subwindow_len, overlap, sample_interval=sample_interval
