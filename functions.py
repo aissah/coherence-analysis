@@ -90,7 +90,8 @@ def windowed_spectra(
         win_start = win_end - overlap
         win_end = win_start + window_samples
         absolute_spectra = np.fft.rfft(data[:, win_start:win_end])
-        win_spectra = np.append(win_spectra, absolute_spectra[np.newaxis], axis=0)
+        win_spectra = np.append(win_spectra, absolute_spectra[np.newaxis],
+                                axis=0)
         # win_start = win_end
 
     frequencies = np.fft.rfftfreq(window_samples, sample_interval)
@@ -186,7 +187,8 @@ def welch_coherence(
     normalizer = normalizer.transpose(2, 1, 0)
 
     welch_numerator = np.matmul(
-        win_spectra.transpose(2, 1, 0), np.conjugate(win_spectra.transpose(2, 0, 1))
+        win_spectra.transpose(2, 1, 0),
+        np.conjugate(win_spectra.transpose(2, 0, 1))
     )
     welch_numerator = np.absolute(welch_numerator) ** 2
     coherence = np.multiply(welch_numerator, 1 / normalizer)
@@ -203,11 +205,11 @@ def exact_coherence(
 ):
     """
 
-    Compute the detection significance from coherence of data using the exact method.
-    The detection significance is the ratio of the largest eigenvalue to the sum of
-    all eigenvalues. This method computes the coherence matrix using the Welch method,
-    and then computes the eigenvalues and subsequent detection significance at all
-    frequencies.
+    Compute the detection significance from coherence of data using the exact
+    method. The detection significance is the ratio of the largest eigenvalue
+    to the sum of all eigenvalues. This method computes the coherence matrix
+    using the Welch method, and then computes the eigenvalues and subsequent
+    detection significance at all frequencies.
 
     Parameters
     ----------
@@ -216,18 +218,19 @@ def exact_coherence(
     subwindow_len : int
         DESCRIPTION. Length of the subwindows in seconds.
     overlap : int, optional
-        DESCRIPTION. Overlap between adjacent subwindows in seconds. The default is 0.
+        DESCRIPTION. Overlap between adjacent subwindows in seconds.
+        The default is 0.
     resolution : float, optional
-        DESCRIPTION. Resolution of the detection significance from 0 to 1. The default
-        is 0.1.
+        DESCRIPTION. Resolution of the detection significance from 0 to 1.
+        The default is 0.1.
     sample_interval : float, optional
         DESCRIPTION. Sample interval of the data. The default is 1.
 
     Returns
     -------
     detection_significance : numpy array
-        DESCRIPTION. Detection significance of the data based on coherence computed using
-        the exact method
+        DESCRIPTION. Detection significance of the data based on coherence
+        computed using the exact method
     eigenvalss : numpy array
         DESCRIPTION. Eigenvalues of the coherence matrix
 
@@ -238,12 +241,14 @@ def exact_coherence(
     num_frames = coherence.shape[0]
     num_frames = int(num_frames * resolution)
 
-    # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
+    # Custom line due to apparent lowpass in BH data:
+    # only use 3/5 of the frames
     num_frames = int(num_frames * 3 / 5)
 
     num_subwindows = coherence.shape[2]
     detection_significance = np.empty(num_frames)
-    eigenvalss = np.empty((num_frames, num_subwindows))  # store the eigenvalues
+    # store the eigenvalues
+    eigenvalss = np.empty((num_frames, num_subwindows))
 
     for d in range(num_frames):
         eigenvals, _ = np.linalg.eig(coherence[d * int(1 / resolution)])
@@ -257,33 +262,36 @@ def exact_coherence(
 def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     """
 
-    Compute the detection significance from coherence of data using an SVD approximation.
-    The detection significance is the ratio of the largest eigenvalue to the sum of all
-    eigenvalues. This method computes the coherence matrix from the normalised spectra
-    matrix provided, and then approximates the eigenvalues and subsequent detection
-    significance at all frequencies using SVD.
+    Compute the detection significance from coherence of data using an SVD
+    approximation. The detection significance is the ratio of the largest
+    eigenvalue to the sum of all eigenvalues. This method computes the
+    coherence matrix from the normalised spectra matrix provided, and then
+    approximates the eigenvalues and subsequent detection significance at
+    all frequencies using SVD.
 
     Parameters
     ----------
     norm_win_spectra : numpy array
         DESCRIPTION. Normalized windowed spectra
     resolution : float, optional
-        DESCRIPTION. Resolution of the detection significance from 0 to 1. The default
-        is 0.1.
+        DESCRIPTION. Resolution of the detection significance from 0 to 1.
+        The default is 0.1.
 
     Returns
     -------
     detection_significance : numpy array
-        DESCRIPTION. Detection significance of the data based on coherence computed using
-        the SVD method
+        DESCRIPTION. Detection significance of the data based on coherence
+        computed using the SVD method
     svd_approxs : numpy array
-        DESCRIPTION. Approximation of the eigenvalues of the data using the SVD method
+        DESCRIPTION. Approximation of the eigenvalues of the data using the
+        SVD method
 
     """
     num_frames = norm_win_spectra.shape[0]
     num_frames = int(num_frames * resolution)
 
-    # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
+    # Custom line due to apparent lowpass in BH data:
+    # only use 3/5 of the frames
     num_frames = int(num_frames * 2 / 5)
 
     num_subwindows = norm_win_spectra.shape[2]
@@ -302,32 +310,38 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
 def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     """
 
-    Compute the detection significance from coherence of data using a QR decomposition
-    approximation. The detection significance is the ratio of the largest eigenvalue to
-    the sum of all eigenvalues. This method computes the coherence matrix from the normalised
-    spectra matrix provided, and then approximates the eigenvalues and subsequent detection
-    significance at all frequencies using QR decomposition.
+    Compute the detection significance from coherence of data using a QR
+    decomposition approximation. The detection significance is the ratio of the
+    largest eigenvalue to the sum of all eigenvalues. This method computes the
+    coherence matrix from the normalised spectra matrix provided, and then
+    approximates the eigenvalues and subsequent detection significance at all
+    frequencies using QR decomposition.
 
     Parameters
     ----------
     norm_win_spectra : numpy array
         DESCRIPTION. Normalized windowed spectra
     resolution : float, optional
-        DESCRIPTION. Resolution of the detection significance from 0 to 1. The default is 0.1.
+        DESCRIPTION. Resolution of the detection significance from 0 to 1.
+        The default is 0.1.
 
     Returns
     -------
     detection_significance : numpy array
-        DESCRIPTION. Detection significance of the data based on coherence computed using
+        DESCRIPTION. Detection significance of the data based on coherence
+        computed using
         the QR decomposition
     qr_approxs : numpy array
-        DESCRIPTION. Approximation of the eigenvalues of the data using the QR decomposition
+        DESCRIPTION. Approximation of the eigenvalues of the data using the QR
+        decomposition
 
     """
+    print("QR COHERENCE", flush=True)
     num_frames = norm_win_spectra.shape[0]
     num_frames = int(num_frames * resolution)
 
-    # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
+    # Custom line due to apparent lowpass in BH data:
+    # only use 3/5 of the frames
     num_frames = int(num_frames * 2 / 5)
 
     num_subwindows = norm_win_spectra.shape[2]
@@ -336,12 +350,13 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
 
     for d in range(num_frames):
         _, R = np.linalg.qr(norm_win_spectra[d * int(1 / resolution)])
-        qr_approx = np.absolute(R@np.conjugate(R.transpose()))
+        qr_approx = np.diag(R@np.conjugate(R.transpose()))
         sorted_qr_approx = np.sort(qr_approx)[::-1]
-
+        print(sorted_qr_approx.shape, flush=True)
         detection_significance[d] = sorted_qr_approx[0] / np.sum(
             np.absolute(sorted_qr_approx)
         )
+        print(qr_approxs.shape, qr_approx.shape, flush=True)
         qr_approxs[d] = qr_approx
 
     return detection_significance, qr_approxs
@@ -351,36 +366,41 @@ def rsvd_coherence(
     norm_win_spectra: np.ndarray, resolution: int = 1, approx_rank: int = None
 ):
     """
-    Compute the detection significance from coherence of data using a randomized SVD approximation.
-    The detection significance is the ratio of the largest eigenvalue to the sum of all eigenvalues.
-    This method computes the coherence matrix from the normalised spectra matrix provided, and then
-    approximates the eigenvalues and subsequent detection significance at all frequencies using
-    randomized SVD.
+    Compute the detection significance from coherence of data using a
+    randomized SVD approximation. The detection significance is the ratio
+    of the largest eigenvalue to the sum of all eigenvalues. This method
+    computes the coherence matrix from the normalised spectra matrix provided,
+    and then approximates the eigenvalues and subsequent detection significance
+    at all frequencies using randomized SVD.
 
     Parameters
     ----------
     norm_win_spectra : numpy array
         DESCRIPTION. Normalized windowed spectra
     resolution : float, optional
-        DESCRIPTION. Resolution of the detection significance from 0 to 1. The default is 0.1.
+        DESCRIPTION. Resolution of the detection significance from 0 to 1.
+        The default is 0.1.
     approx_rank : int, optional
-        DESCRIPTION. Approximate rank for the randomized SVD method. The default is None.
+        DESCRIPTION. Approximate rank for the randomized SVD method.
+        The default is None.
 
     Returns
     -------
     detection_significance : numpy array
-        DESCRIPTION. Detection significance of the data based on coherence computed using the
-        randomized SVD method
+        DESCRIPTION. Detection significance of the data based on coherence
+        computed using the randomized SVD method
     rsvd_approxs : numpy array
-        DESCRIPTION. Approximation of the eigenvalues of the data using the randomized SVD method
+        DESCRIPTION. Approximation of the eigenvalues of the data using the
+        randomized SVD method
 
     """
-    from sklearn.utils.extmath import randomized_svd
+    from sklearn.utils.extmath import randomized_svd  # type: ignore
 
     num_frames = norm_win_spectra.shape[0]
     num_frames = int(num_frames * resolution)
 
-    # Custom line due to apparent lowpass in BH data: only use 3/5 of the frames
+    # Custom line due to apparent lowpass in BH data:
+    # only use 3/5 of the frames
     num_frames = int(num_frames * 2 / 5)
 
     if approx_rank is None:
@@ -461,13 +481,14 @@ def coherence(
     data: np.array,
     subwindow_len: int,
     overlap: int,
-    resolution: float = 0.1,
+    resolution: float = 1,
     sample_interval: float = 1,
     method: str = "exact",
     approx_rank: int = 10,
 ):
     """
-    Compute the detection significance from coherence of data using the specified method.
+    Compute the detection significance from coherence of data using the
+    specified method.
 
     Parameters
     ----------
@@ -478,21 +499,24 @@ def coherence(
     overlap : int
         DESCRIPTION. Overlap between adjacent subwindows in seconds
     Freq : int, optional
-        DESCRIPTION. Frequency to compute the coherence at, option is not implemented yet.
-        The default is None. If None, the coherence is computed at all frequencies
+        DESCRIPTION. Frequency to compute the coherence at, option is not
+        implemented yet. The default is None. If None, the coherence is
+        computed at all frequencies.
     sample_interval : float, optional
         DESCRIPTION. Sample interval of the data. The default is 1.
     method : str, optional
-        DESCRIPTION. Method to use for coherence analysis. The default is 'exact'.
+        DESCRIPTION. Method to use for coherence analysis.
+        The default is 'exact'.
         Options are: 'exact', 'qr', 'svd', 'rsvd', 'power', 'qr iteration'
     approx_rank : int, optional
-        DESCRIPTION. Approximate rank for the randomized SVD method. The default is 10.
+        DESCRIPTION. Approximate rank for the randomized SVD method.
+        The default is 10.
 
     Returns
     -------
     detection_significance : numpy array
-        DESCRIPTION. Detection significance of the coherence of the data computed using the
-        specified method
+        DESCRIPTION. Detection significance of the coherence of the data
+        computed using the specified method
 
     Example
     --------
@@ -501,6 +525,7 @@ def coherence(
     """
 
     METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+    print(f"Method: {method}", flush=True)
     if method == "exact":
         return exact_coherence(
             data, subwindow_len, overlap, sample_interval=sample_interval
@@ -527,4 +552,5 @@ def coherence(
     elif method == "qr iteration":
         return qr_iteration(data, tol=1e-6, max_iter=1000)
     else:
-        raise ValueError(f"Invalid method: {method}. Valid methods are: {METHODS}")
+        raise ValueError(f"Invalid method: {method}."
+                         f"Valid methods are: {METHODS}")
