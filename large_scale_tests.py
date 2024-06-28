@@ -155,7 +155,7 @@ if __name__ == "__main__":
     # "D:/CSM/Mines_Research/Test_data/"
 
     # Get the file names of the data files by going through the folders
-    # contained in the base path and putting together the paths to files 
+    # contained in the base path and putting together the paths to files
     # ending in .h5
     data_files = []
     for dir_path, dir_names, file_names in os.walk(data_basepath):
@@ -188,12 +188,6 @@ if __name__ == "__main__":
         first_file_time = data_files[0][-15:-3]
         data_files = data_files[:batch_size]
         metadata["files"] = [a[-15:-3] for a in data_files]
-        # data, _ = func.loadBradyHShdf5(data_files[0], normalize="no")
-        # # data = data[first_channel:last_channel]
-        # data = data[
-        #     first_channel : channel_offset
-        #     + first_channel : int(channel_offset / num_channels)
-        # ]
     else:  # with more batches, append end of previous file for continuity
         try:
             data_files = data_files[(batch - 1) * batch_size - 1 : batch * batch_size]
@@ -203,28 +197,6 @@ if __name__ == "__main__":
             metadata["files"] = [a[-15:-3] for a in data_files]
 
     next_index = 0
-    # data, _ = func.loadBradyHShdf5(data_files[0], normalize="no")
-    # data = data[
-    #     first_channel : channel_offset
-    #     + first_channel : int(channel_offset / num_channels)
-    # ]
-
-    # # check if the data is long enough to be used for the analysis
-    # # if not, load the next file and append to the data
-    # len_data = data.shape[1] / samples_per_sec
-    # next_index = 1
-    # while len_data < averaging_window_length and next_index < len(data_files):
-    #     next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
-    #     next_data = next_data[
-    #         first_channel : channel_offset
-    #         + first_channel : int(channel_offset / num_channels)
-    #     ]
-    #     data = np.append(
-    #         data, next_data[:, : averaging_window_length * samples_per_sec], axis=1
-    #     )
-    #     len_data = data.shape[1] / samples_per_sec
-    #     next_index += 1
-
     data, next_index, stop_sample_index = _next_data_window(
         data_files, next_index, averaging_window_length, samples_per_sec
     )
@@ -244,36 +216,11 @@ if __name__ == "__main__":
         raise ValueError(f"Method {method} not available"
                          " for coherence analysis")
 
-    # if method == 'qr':
-    #     detection_significances, eig_estimatess = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-    # elif method in METHODS:
-    #     detection_significances = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-    # else:
-    #     raise ValueError(f"Method {method} not available for coherence analysis")
-
     end_time = datetime.now()
     print(f"First file completed in: {end_time - start_time}", flush=True)
 
     # for a in data_files[1:]:
     while next_index < len(data_files) - 1:
-        # data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
-        # data = data[
-        #     first_channel : channel_offset
-        #     + first_channel : int(channel_offset / num_channels)
-        # ]
-        # next_index += 1
-        # while len_data < averaging_window_length and next_index < len(data_files):
-        #     next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
-        #     next_data = next_data[
-        #         first_channel : channel_offset
-        #         + first_channel : int(channel_offset / num_channels)
-        #     ]
-        #     data = np.append(
-        #         data, next_data[:, : averaging_window_length * samples_per_sec], axis=1
-        #     )
-        #     len_data = data.shape[1] / samples_per_sec
-        #     next_index += 1
-
         data, next_index, stop_sample_index = _next_data_window(
             data_files,
             next_index,
@@ -282,13 +229,6 @@ if __name__ == "__main__":
             stop_sample_index,
         )
 
-        # preceding_data = data[:, -overlap * samples_per_sec :]
-        # data, _ = func.loadBradyHShdf5(a, normalize="no")
-        # # data = np.append(preceding_data, data[first_channel:last_channel], axis=1)
-        # data = data[
-        #     first_channel : channel_offset
-        #     + first_channel : int(channel_offset / num_channels)
-        # ]
         if data.shape[1] == averaging_window_length * samples_per_sec:
             detection_significance, eig_estimates = func.coherence(
                 data,
@@ -298,18 +238,12 @@ if __name__ == "__main__":
                 method=method,
             )
 
-            # if method == 'qr':
-            #     detection_significance, eig_estimates = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-            # else: # elif method in METHODS:
-            #     detection_significance = func.coherence(data, sub_window_length, overlap, sample_interval=1/samples_per_sec, method=method)
-
             if detection_significance.shape == detection_significances.shape:
                 detection_significances = np.append(
                     detection_significances[np.newaxis],
                     detection_significance[np.newaxis],
                     axis=0,
                 )
-                # eig_estimatess = np.append(eig_estimatess[np.newaxis], eig_estimates[np.newaxis], axis=0)
             else:
                 detection_significances = np.append(
                     detection_significances, detection_significance[np.newaxis], axis=0
@@ -319,22 +253,18 @@ if __name__ == "__main__":
         else:
             print(
                 f"Data length of {data.shape[1]} not the expected"
-                 " {averaging_window_length * samples_per_sec} for analysis."
-                  " {len(data_files) - next_index} files still remaining ",
+                " {averaging_window_length * samples_per_sec} for analysis."
+                " {len(data_files) - next_index} files still remaining ",
                 flush=True,
             )
 
     print(
         f"Finished in: {datetime.now()-start_time} for {method} method."
-         " Saving to file...", flush=True,
+        " Saving to file...", flush=True,
     )
 
-    # save the results of detection significance, eigenvalues, and metadata to different files
-    # save_data = {'detection_significance': detection_significances, 'metadata': metadata}
-    # savename = (
-    #     save_location
-    #     / f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    # )
+    # save the results of detection significance, eigenvalues, and metadata to
+    # different files
     savename = os.path.join(
         save_location,
         f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
@@ -342,11 +272,6 @@ if __name__ == "__main__":
     with open(savename, "wb") as f:
         pickle.dump(detection_significances, f)
 
-    # save_data = {'eig_estimates': eig_estimatess, 'metadata': metadata}
-    # savename = (
-    #     save_location
-    #     / f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    # )
     savename = os.path.join(
         save_location,
         f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
@@ -354,10 +279,6 @@ if __name__ == "__main__":
     with open(savename, "wb") as f:
         pickle.dump(eig_estimatess, f)
 
-    # savename = (
-    #     save_location
-    #     / f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl"
-    # )
     savename = os.path.join(
         save_location,
         f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
