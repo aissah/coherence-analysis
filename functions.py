@@ -241,7 +241,7 @@ def exact_coherence(
 
     # Custom line due to apparent lowpass in BH data:
     # only use 3/5 of the frames
-    num_frames = int(num_frames * 3 / 5)
+    num_frames = int(num_frames * 2 / 5)
 
     num_subwindows = coherence.shape[2]
     detection_significance = np.empty(num_frames)
@@ -344,13 +344,12 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
 
     num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
-    qr_approxs = np.empty((num_frames, num_subwindows))
+    qr_approxs = np.empty((num_frames, np.min(norm_win_spectra.shape[1:])))
 
     for d in range(num_frames):
         _, R = np.linalg.qr(norm_win_spectra[d * int(1 / resolution)])
         qr_approx = np.diag(R @ np.conjugate(R.transpose()))
         sorted_qr_approx = np.sort(qr_approx)[::-1]
-        print(sorted_qr_approx.shape, flush=True)
         detection_significance[d] = sorted_qr_approx[0] / np.sum(
             np.absolute(sorted_qr_approx)
         )
@@ -525,7 +524,7 @@ def coherence(
 
     if method == "exact":
         return exact_coherence(
-            data, subwindow_len, overlap, sample_interval=sample_interval
+            data, subwindow_len, overlap, sample_interval=sample_interval, resolution=resolution
         )
     elif method == "qr":
         norm_win_spectra, _ = normalised_windowed_spectra(
