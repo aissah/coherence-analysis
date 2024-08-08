@@ -194,6 +194,47 @@ def welch_coherence(
     return coherence, frequencies
 
 
+def covariance(
+    data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
+):
+    """
+
+    Calculate the covariance matrix at all (or particular frequencies: yet to be
+    implemented).
+
+    Parameters
+    ----------
+    data : numpy array
+        DESCRIPTION. Data in time for coherence analysis
+    subwindow_len : int
+        DESCRIPTION. Length of the subwindows in seconds
+    overlap : int
+        DESCRIPTION. Overlap between adjacent subwindows in seconds
+    freq : int, optional
+        DESCRIPTION. Frequency to compute the coherence at. The default is
+        None. If None, the coherence is computed at all frequencies
+    sample_interval : float, optional
+        DESCRIPTION. Sample interval of the data. The default is 1.
+
+    Returns
+    -------
+    covariance : numpy array
+        DESCRIPTION. Coherence matrix of the data
+    frequencies : numpy array
+        DESCRIPTION. Frequencies at which the coherence is computed
+
+    """
+    win_spectra, frequencies = windowed_spectra(
+        data, subwindow_len, overlap, freq, sample_interval
+    )
+
+    covariance = np.matmul(
+        win_spectra.transpose(2, 1, 0), np.conjugate(win_spectra.transpose(2, 0, 1))
+    )
+    # welch_numerator = np.absolute(welch_numerator) ** 2
+
+    return covariance, frequencies
+
 def exact_coherence(
     data: np.array,
     subwindow_len: int,
