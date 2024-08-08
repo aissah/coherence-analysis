@@ -199,8 +199,8 @@ def covariance(
 ):
     """
 
-    Calculate the covariance matrix at all (or particular frequencies: yet to be
-    implemented).
+    Calculate the covariance matrix at all (or particular frequencies: yet to
+    be implemented).
 
     Parameters
     ----------
@@ -234,6 +234,7 @@ def covariance(
     # welch_numerator = np.absolute(welch_numerator) ** 2
 
     return covariance, frequencies
+
 
 def exact_coherence(
     data: np.array,
@@ -383,7 +384,7 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     # only use 3/5 of the frames
     num_frames = int(num_frames * 2 / 5)
 
-    num_subwindows = norm_win_spectra.shape[2]
+    # num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
     qr_approxs = np.empty((num_frames, np.min(norm_win_spectra.shape[1:])))
 
