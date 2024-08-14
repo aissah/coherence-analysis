@@ -205,21 +205,21 @@ def covariance(
     Parameters
     ----------
     data : numpy array
-        DESCRIPTION. Data in time for coherence analysis
+        DESCRIPTION. Data in time for covariance analysis
     subwindow_len : int
         DESCRIPTION. Length of the subwindows in seconds
     overlap : int
         DESCRIPTION. Overlap between adjacent subwindows in seconds
     freq : int, optional
-        DESCRIPTION. Frequency to compute the coherence at. The default is
-        None. If None, the coherence is computed at all frequencies
+        DESCRIPTION. Frequency to compute the covariance at. The default is
+        None. If None, the covariance is computed at all frequencies
     sample_interval : float, optional
         DESCRIPTION. Sample interval of the data. The default is 1.
 
     Returns
     -------
     covariance : numpy array
-        DESCRIPTION. Coherence matrix of the data
+        DESCRIPTION. Covariance matrix of the data
     frequencies : numpy array
         DESCRIPTION. Frequencies at which the coherence is computed
 
