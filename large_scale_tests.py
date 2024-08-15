@@ -213,7 +213,8 @@ if __name__ == "__main__":
             method=method,
         )
     else:
-        raise ValueError(f"Method {method} not available" " for coherence analysis")
+        error_msg = f"Method {method} not available for coherence analysis"
+        raise ValueError(error_msg)
 
     end_time = datetime.now()
     print(f"First file completed in: {end_time - start_time}", flush=True)
