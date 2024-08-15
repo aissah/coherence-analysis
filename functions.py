@@ -289,9 +289,10 @@ def exact_coherence(
     detection_significance = np.empty(num_frames)
     # store the eigenvalues
     eigenvalss = np.empty((num_frames, num_subwindows))
+    freq_interval = int(1 / resolution)
 
     for d in range(num_frames):
-        eigenvals, _ = np.linalg.eig(coherence[d * int(1 / resolution)])
+        eigenvals, _ = np.linalg.eig(coherence[d * freq_interval])
         eigenvalss[d] = eigenvals[:num_subwindows]
         eigenvals = np.sort(eigenvals)[::-1]
         detection_significance[d] = eigenvals[0] / np.sum(eigenvals)
@@ -337,9 +338,10 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
     svd_approxs = np.empty((num_frames, num_subwindows))
+    freq_interval = int(1 / resolution)
 
     for d in range(num_frames):
-        _, S, _ = np.linalg.svd(norm_win_spectra[d * 2])
+        _, S, _ = np.linalg.svd(norm_win_spectra[d * freq_interval])
         svd_approx = S**2
         svd_approxs[d] = svd_approx[:num_subwindows]
         detection_significance[d] = svd_approx[0] / np.sum(svd_approx)
@@ -387,9 +389,10 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     # num_subwindows = norm_win_spectra.shape[2]
     detection_significance = np.empty(num_frames)
     qr_approxs = np.empty((num_frames, np.min(norm_win_spectra.shape[1:])))
+    freq_interval = int(1 / resolution)
 
     for d in range(num_frames):
-        _, R = np.linalg.qr(norm_win_spectra[d * int(1 / resolution)])
+        _, R = np.linalg.qr(norm_win_spectra[d * freq_interval])
         qr_approx = np.diag(R @ np.conjugate(R.transpose()))
         sorted_qr_approx = np.sort(qr_approx)[::-1]
         detection_significance[d] = sorted_qr_approx[0] / np.sum(
