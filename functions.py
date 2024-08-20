@@ -295,7 +295,8 @@ def exact_coherence(
     freq_interval = int(1 / resolution)
 
     for d in range(num_frames):
-        eigenvals, _ = np.linalg.eig(coherence[d * freq_interval])
+        # eigenvals, _ = np.linalg.eig(coherence[d * freq_interval])
+        eigenvals = np.linalg.eigvalsh(coherence[d * freq_interval])
         eigenvalss[d] = eigenvals[:num_subwindows]
         eigenvals = np.sort(eigenvals)[::-1]
         detection_significance[d] = eigenvals[0] / np.sum(eigenvals)
@@ -344,7 +345,8 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     freq_interval = int(1 / resolution)
 
     for d in range(num_frames):
-        _, S, _ = np.linalg.svd(norm_win_spectra[d * freq_interval])
+        # _, S, _ = np.linalg.svd(norm_win_spectra[d * freq_interval])
+        S = np.linalg.svd(norm_win_spectra[d * freq_interval], compute_uv=False, hermitian=False)
         svd_approx = S**2
         svd_approxs[d] = svd_approx[:num_subwindows]
         detection_significance[d] = svd_approx[0] / np.sum(svd_approx)
