@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 
 
-def loadBradyHShdf5(file, normalize="yes"):
+def loadBradyHShdf5(file: str, normalize: bool = "no"):
     """
     Load brady hotspring h5py data file and return the data and timestamps.
 
@@ -44,7 +44,11 @@ def loadBradyHShdf5(file, normalize="yes"):
 
 
 def windowed_spectra(
-    data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
+    data: np.array,
+    subwindow_len: int,
+    overlap: float,
+    freq=None,
+    sample_interval: int = 1,
 ):
     """
 
@@ -99,7 +103,11 @@ def windowed_spectra(
 
 
 def normalised_windowed_spectra(
-    data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
+    data: np.array,
+    subwindow_len: int,
+    overlap: float,
+    freq=None,
+    sample_interval: int = 1,
 ):
     win_spectra, frequencies = windowed_spectra(
         data, subwindow_len, overlap, freq, sample_interval
@@ -147,7 +155,11 @@ def normalised_windowed_spectra(
 
 
 def welch_coherence(
-    data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
+    data: np.array,
+    subwindow_len: int,
+    overlap: float,
+    freq=None,
+    sample_interval: int = 1,
 ):
     """
 
@@ -195,7 +207,11 @@ def welch_coherence(
 
 
 def covariance(
-    data: np.array, subwindow_len: int, overlap, freq=None, sample_interval=1
+    data: np.array,
+    subwindow_len: int,
+    overlap: float,
+    freq=None,
+    sample_interval: int = 1,
 ):
     """
 
@@ -241,7 +257,7 @@ def exact_coherence(
     subwindow_len: int,
     overlap: int = 0,
     resolution: float = 0.1,
-    sample_interval=1,
+    sample_interval: int = 1,
 ):
     """
 
@@ -462,7 +478,7 @@ def rsvd_coherence(
     return detection_significance, rsvd_approxs
 
 
-def qr_iteration(A, tol=1e-6, max_iter=1000):
+def qr_iteration(A: np.array, tol: float = 1e-6, max_iter: int = 1000):
     """
     Compute the eigenvalues of A using the QR iteration method
 
@@ -491,7 +507,7 @@ def qr_iteration(A, tol=1e-6, max_iter=1000):
     return np.diag(A)
 
 
-def power_iteration(A, tol=1e-6, max_iter=1000):
+def power_iteration(A: np.array, tol: float = 1e-6, max_iter: int = 1000):
     """
     Compute the eigenvalues of A using the power iteration method
 
