@@ -90,8 +90,7 @@ def windowed_spectra(
         win_start = win_end - overlap
         win_end = win_start + window_samples
         absolute_spectra = np.fft.rfft(data[:, win_start:win_end])
-        win_spectra = np.append(win_spectra, absolute_spectra[np.newaxis],
-                                axis=0)
+        win_spectra = np.append(win_spectra, absolute_spectra[np.newaxis], axis=0)
         # win_start = win_end
 
     frequencies = np.fft.rfftfreq(window_samples, sample_interval)
@@ -187,8 +186,7 @@ def welch_coherence(
     normalizer = normalizer.transpose(2, 1, 0)
 
     welch_numerator = np.matmul(
-        win_spectra.transpose(2, 1, 0),
-        np.conjugate(win_spectra.transpose(2, 0, 1))
+        win_spectra.transpose(2, 1, 0), np.conjugate(win_spectra.transpose(2, 0, 1))
     )
     welch_numerator = np.absolute(welch_numerator) ** 2
     coherence = np.multiply(welch_numerator, 1 / normalizer)
@@ -231,8 +229,7 @@ def covariance(
     )
 
     covariance = np.matmul(
-        win_spectra.transpose(2, 1, 0),
-        np.conjugate(win_spectra.transpose(2, 0, 1))
+        win_spectra.transpose(2, 1, 0), np.conjugate(win_spectra.transpose(2, 0, 1))
     )
     # welch_numerator = np.absolute(welch_numerator) ** 2
 
@@ -346,7 +343,9 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
 
     for d in range(num_frames):
         # _, S, _ = np.linalg.svd(norm_win_spectra[d * freq_interval])
-        S = np.linalg.svd(norm_win_spectra[d * freq_interval], compute_uv=False, hermitian=False)
+        S = np.linalg.svd(
+            norm_win_spectra[d * freq_interval], compute_uv=False, hermitian=False
+        )
         svd_approx = S**2
         svd_approxs[d] = svd_approx[:num_subwindows]
         detection_significance[d] = svd_approx[0] / np.sum(svd_approx)
@@ -574,8 +573,11 @@ def coherence(
 
     if method == "exact":
         return exact_coherence(
-            data, subwindow_len, overlap, sample_interval=sample_interval,
-            resolution=resolution
+            data,
+            subwindow_len,
+            overlap,
+            sample_interval=sample_interval,
+            resolution=resolution,
         )
     elif method == "qr":
         norm_win_spectra, _ = normalised_windowed_spectra(
@@ -601,3 +603,32 @@ def coherence(
     else:
         error_msg = f"Invalid method: {method}; valid methods are: {METHODS}"
         raise ValueError(error_msg)
+
+
+def rm_laser_drift(data: np.array):
+    """
+    remove laser drift from DAS data by subtracting the median of each time
+    sample. Assumes the first dimension of the data is along the fibre.
+
+    Parameters
+    ----------
+    data : numpy array
+        DESCRIPTION. Data to remove laser drift from
+
+    Returns
+    -------
+    data : numpy array
+        DESCRIPTION. Data with laser drift removed
+
+    Example
+    --------
+    data = np.random.rand(100, 1000)
+    data = rm_laser_drift(data)
+    """
+
+    # compute median along fibre for each time sample
+    med = np.median(data, axis=0)
+    # subtract median from each corresponding time sample
+    data = data - med[np.newaxis, :]
+
+    return data
