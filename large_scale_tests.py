@@ -99,6 +99,7 @@ def _next_data_window(
     while window_deficit > 0 and next_index < num_files - 1:
         next_index += 1  # index of the next file to read data from
         next_data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
+        next_data = func.rm_laser_drift(next_data)
         next_data = next_data[
             first_channel : channel_offset
             + first_channel : int(channel_offset / num_channels)
