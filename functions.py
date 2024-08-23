@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 
 
-def loadBradyHShdf5(file: str, normalize: bool = "no"):
+def loadBradyHShdf5(file: str, normalize: bool = "no") -> tuple:
     """
     Load brady hotspring h5py data file and return the data and timestamps.
 
@@ -49,7 +49,7 @@ def windowed_spectra(
     overlap: float,
     freq=None,
     sample_interval: int = 1,
-):
+) -> tuple:
     """
 
     Calculate the frequency domain representation of data in windows.
@@ -108,7 +108,7 @@ def normalised_windowed_spectra(
     overlap: float,
     freq=None,
     sample_interval: int = 1,
-):
+) -> tuple:
     win_spectra, frequencies = windowed_spectra(
         data, subwindow_len, overlap, freq, sample_interval
     )
@@ -160,7 +160,7 @@ def welch_coherence(
     overlap: float,
     freq=None,
     sample_interval: int = 1,
-):
+) -> tuple:
     """
 
     Calculate the coherence matrix at all (or particular frequencies: yet to be
@@ -212,7 +212,7 @@ def covariance(
     overlap: float,
     freq=None,
     sample_interval: int = 1,
-):
+) -> tuple:
     """
 
     Calculate the covariance matrix at all (or particular frequencies: yet to
@@ -621,7 +621,7 @@ def coherence(
         raise ValueError(error_msg)
 
 
-def rm_laser_drift(data: np.array):
+def rm_laser_drift(data: np.array) -> np.array:
     """
     remove laser drift from DAS data by subtracting the median of each time
     sample. Assumes the first dimension of the data is along the fibre.
