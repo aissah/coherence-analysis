@@ -38,11 +38,11 @@ import functions as func
 
 
 def _next_data_window(
-    data_files,
-    next_index,
-    averaging_window_length,
-    samples_per_sec,
-    start_sample_index=0,
+    data_files: list[str],
+    next_index: int,
+    averaging_window_length: int,
+    samples_per_sec: int,
+    start_sample_index: int = 0,
 ):
     """
     Load the next data window from the data files. This function is used to
@@ -53,7 +53,7 @@ def _next_data_window(
 
     Parameters
     ----------
-    data_file : list
+    data_file : list[str]
         list of the data files to read data from
     next_index : int
         index of the next file to read data from

@@ -87,14 +87,14 @@ def windowed_spectra(
 
     win_end = intervals[0]
 
-    absolute_spectra = np.fft.rfft(data[:, win_start:win_end])
-    win_spectra = absolute_spectra[np.newaxis]
+    spectra = np.fft.rfft(data[:, win_start:win_end])
+    win_spectra = spectra[np.newaxis]
 
     while win_end < total_samples:
         win_start = win_end - overlap
         win_end = win_start + window_samples
-        absolute_spectra = np.fft.rfft(data[:, win_start:win_end])
-        win_spectra = np.append(win_spectra, absolute_spectra[np.newaxis], axis=0)
+        spectra = np.fft.rfft(data[:, win_start:win_end])
+        win_spectra = np.append(win_spectra, spectra[np.newaxis], axis=0)
         # win_start = win_end
 
     frequencies = np.fft.rfftfreq(window_samples, sample_interval)
@@ -144,6 +144,9 @@ def normalised_windowed_spectra(
     win_spectra, frequencies = windowed_spectra(
         data, subwindow_len, overlap, freq, sample_interval
     )
+
+    mean_spectra = np.mean(win_spectra, axis=0)
+    win_spectra -= mean_spectra
 
     normalizer = np.sum(np.absolute(win_spectra) ** 2, axis=0)
     normalizer = np.tile(np.sqrt(normalizer), (win_spectra.shape[0], 1, 1))
@@ -198,7 +201,8 @@ def welch_coherence(
     normalizer = normalizer.transpose(2, 1, 0)
 
     welch_numerator = np.matmul(
-        win_spectra.transpose(2, 1, 0), np.conjugate(win_spectra.transpose(2, 0, 1))
+        win_spectra.transpose(2, 1, 0),
+        np.conjugate(win_spectra.transpose(2, 0, 1)),
     )
     welch_numerator = np.absolute(welch_numerator) ** 2
     coherence = np.multiply(welch_numerator, 1 / normalizer)
@@ -245,7 +249,8 @@ def covariance(
     )
 
     covariance = np.matmul(
-        win_spectra.transpose(2, 1, 0), np.conjugate(win_spectra.transpose(2, 0, 1))
+        win_spectra.transpose(2, 1, 0),
+        np.conjugate(win_spectra.transpose(2, 0, 1)),
     )
     # welch_numerator = np.absolute(welch_numerator) ** 2
 
@@ -360,7 +365,9 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     for d in range(num_frames):
         # _, S, _ = np.linalg.svd(norm_win_spectra[d * freq_interval])
         S = np.linalg.svd(
-            norm_win_spectra[d * freq_interval], compute_uv=False, hermitian=False
+            norm_win_spectra[d * freq_interval],
+            compute_uv=False,
+            hermitian=False,
         )
         svd_approx = S**2
         svd_approxs[d] = svd_approx[:num_subwindows]
