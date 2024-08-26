@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 
-module load apps/python3/2020.02
+module load apps/python3
 
 source activate ny_env
 
