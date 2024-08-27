@@ -6,7 +6,7 @@
 
 module load apps/python3
 
-source activate ny_env
+source activate research_env
 
 # python large_scale_test.py <file> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <channel_offset> <num_channels> <samples_per_sec> <method> <batch> <batch_size>
 
