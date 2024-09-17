@@ -168,31 +168,14 @@ if __name__ == "__main__":
     spool = spool.chunk(time=averaging_window_length)
 
     # subselect n_channels number of channels starting from start_channel
-    sub_spool = spool.select(distance=(first_channel,first_channel+channel_offset), samples=True)
+    spool = spool.select(distance=(first_channel,first_channel+channel_offset), samples=True)
 
     # another way to subselect channels
     # sub_patch = patch.select(distance=np.array([0, 12, 10, 9]), samples=True)
 
-    # perform coherence calculation on each patch
-    map_out = sub_spool.map(lambda x: f.coherence(x.data.T, sub_window_length,
-                    overlap,
-                    sample_interval=1 / samples_per_sec,
-                    method=method,))
-    
-    detection_significance = np.stack([a[0] for a in map_out], axis=-1)
-    eig_estimates = np.stack([a[1] for a in map_out], axis=-1)
-
-    # data_files = []
-    # for dir_path, dir_names, file_names in os.walk(data_path):
-    #     dir_names.sort()
-    #     file_names.sort()
-    #     data_files.extend(
-    #         [
-    #             os.path.join(dir_path, file_name)
-    #             for file_name in file_names
-    #             if ".h5" in file_name
-    #         ]
-    #     )
+    contents = spool.contents
+    sample_interval = contents['time_step'][0].total_seconds()
+    sample_interval=1 / samples_per_sec
 
     # use all the files if batch size is specified as 0
     # batch_size = len(data_files) if batch_size == 0 else batch_size
@@ -207,19 +190,20 @@ if __name__ == "__main__":
     metadata["num_channels"] = num_channels
     metadata["channel_offset"] = channel_offset
     metadata["method"] = method
+    metadata["times"] = contents[['time_min', 'time_max']]
 
     # load the first file in the batch
-    if batch == 1:
-        first_file_time = data_files[0][-15:-3]
-        data_files = data_files[:batch_size]
-        metadata["files"] = [a[-15:-3] for a in data_files]
-    else:  # with more batches, append end of previous file for continuity
-        try:
-            data_files = data_files[(batch - 1) * batch_size - 1 : batch * batch_size]
-            metadata["files"] = [a[-15:-3] for a in data_files]
-        except IndexError:
-            data_files = data_files[(batch - 1) * batch_size - 1 :]
-            metadata["files"] = [a[-15:-3] for a in data_files]
+    # if batch == 1:
+    #     first_file_time = data_files[0][-15:-3]
+    #     data_files = data_files[:batch_size]
+    #     metadata["files"] = [a[-15:-3] for a in data_files]
+    # else:  # with more batches, append end of previous file for continuity
+    #     try:
+    #         data_files = data_files[(batch - 1) * batch_size - 1 : batch * batch_size]
+    #         metadata["files"] = [a[-15:-3] for a in data_files]
+    #     except IndexError:
+    #         data_files = data_files[(batch - 1) * batch_size - 1 :]
+    #         metadata["files"] = [a[-15:-3] for a in data_files]
 
     # next_index = 0
     # data, next_index, stop_sample_index = _next_data_window(
@@ -230,16 +214,10 @@ if __name__ == "__main__":
     # handled the beginning of later batches. Then we keep appending to
     # the variables set up for first file of the batch above
     if method in METHODS:
-        # detection_significances, eig_estimatess = func.coherence(
-        #     data,
-        #     sub_window_length,
-        #     overlap,
-        #     sample_interval=1 / samples_per_sec,
-        #     method=method,
-        # )
-        map_out = sub_spool.map(lambda x: f.coherence(x.data.T, sub_window_length,
+        # perform coherence calculation on each patch
+        map_out = spool.map(lambda x: f.coherence(x.data.T, sub_window_length,
                     overlap,
-                    sample_interval=1 / samples_per_sec,
+                    sample_interval=sample_interval,
                     method=method,))
     
         detection_significance = np.stack([a[0] for a in map_out], axis=-1)
