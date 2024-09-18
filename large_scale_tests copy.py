@@ -99,6 +99,9 @@ if __name__ == "__main__":
     # another way to subselect channels
     # sub_patch = patch.select(distance=np.array([0, 12, 10, 9]), samples=True)
 
+    end_time = datetime.now()
+    print(f"Data read in: {end_time - start_time}", flush=True)
+
     contents = spool.contents
     sample_interval = contents["time_step"][0].total_seconds()
     sample_interval = 1 / samples_per_sec
@@ -138,9 +141,6 @@ if __name__ == "__main__":
     else:
         error_msg = f"Method {method} not available for coherence analysis"
         raise ValueError(error_msg)
-
-    end_time = datetime.now()
-    print(f"First file completed in: {end_time - start_time}", flush=True)
 
     print(
         f"Finished in: {datetime.now()-start_time} for {method} method."
