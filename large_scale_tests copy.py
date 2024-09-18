@@ -35,115 +35,34 @@ from datetime import datetime
 import dascore as dc
 import numpy as np
 
-import functions as func
-
-
-# def _next_data_window(
-#     data_files: list[str],
-#     next_index: int,
-#     averaging_window_length: int,
-#     samples_per_sec: int,
-#     start_sample_index: int = 0,
-# ):
-#     """
-#     Load the next data window from the data files. This function is used to
-#     load the next window of data from the list of data files. It continues
-#     to read data from the files until the window length is reached. The
-#     function returns the data, the index of the next file to read data from,
-#     and the index with the file at which we stopped reading.
-
-#     Parameters
-#     ----------
-#     data_file : list[str]
-#         list of the data files to read data from
-#     next_index : int
-#         index of the next file to read data from
-#     averaging_window_length : int
-#         length of the averaging window in seconds
-#     samples_per_sec : int
-#         number of samples per second in the data
-#     start_sample_index : int
-#         index of the first sample to read from the next data file
-
-#     Returns
-#     -------
-#     data : np array
-#         data read from the data files
-#     next_index : int
-#         index of the next file to read data from
-#     stop_sample_index : int
-#         index we stopped reading data from file "next_index"
-
-#     """
-
-#     num_files = len(data_files)
-#     total_window_length = averaging_window_length * samples_per_sec
-#     data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
-#     data_len = data.shape[1]
-#     data = data[
-#         first_channel : channel_offset
-#         + first_channel : int(channel_offset / num_channels),
-#         start_sample_index : start_sample_index + total_window_length,
-#     ]
-
-#     stop_sample_index = (
-#         start_sample_index + total_window_length
-#     )  # index we stopped reading data from file "next_index"
-
-#     # number of samples to add to the data to make up the window length
-#     window_deficit = total_window_length - data.shape[1]
-
-#     if window_deficit == 0 and stop_sample_index == data_len:
-#         next_index += 1
-#         stop_sample_index = 0
-
-#     while window_deficit > 0 and next_index < num_files - 1:
-#         next_index += 1  # index of the next file to read data from
-#         next_data, _ = func.loadBradyHShdf5(
-#             data_files[next_index],
-#             normalize="no",
-#         )
-#         next_data = func.rm_laser_drift(next_data)
-#         next_data = next_data[
-#             first_channel : channel_offset
-#             + first_channel : int(channel_offset / num_channels)
-#         ]
-#         data = np.append(data, next_data[:, :window_deficit], axis=1)
-
-#         if window_deficit < next_data.shape[1]:
-#             stop_sample_index = window_deficit
-#         elif window_deficit == next_data.shape[1] or next_index == num_files - 1:
-#             next_index += 1
-#             stop_sample_index = 0
-
-#         window_deficit = total_window_length - data.shape[1]
-
-#     return data, next_index, stop_sample_index
-
-
 if __name__ == "__main__":
     # record start time
     start_time = datetime.now()
 
     # list of methods to use for coherence analysis
-    METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+    METHODS: list[str] = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
 
     # Take inputs from the command line
     # Path to the directory containing the data files
-    data_path = sys.argv[1]
+    data_path: str = sys.argv[1]
     # Path to the directory where the results will be saved
     # save_location = sys.argv[12]
     # Averaging window length in seconds
-    averaging_window_length = int(sys.argv[2])
-    sub_window_length = int(sys.argv[3])  # sub-window length in seconds
-    overlap = int(sys.argv[4])  # overlap in seconds
-    first_channel = int(sys.argv[5])  # first channel
-    channel_offset = int(sys.argv[6])  # Number of channels to choose from
-    num_channels = int(
-        sys.argv[7]
-    )  # Number of channels to subselect from the range of channels
-    samples_per_sec = int(sys.argv[8])  # samples per second
-    method = sys.argv[9]  # method to use for coherence analysis
+    averaging_window_length: int = int(sys.argv[2])
+    # sub-window length in seconds
+    sub_window_length: int = int(sys.argv[3])
+    # overlap in seconds
+    overlap: int = int(sys.argv[4])
+    # channel to start from
+    start_channel: int = int(sys.argv[5])
+    # channels to skip in between
+    channel_offset: int = int(sys.argv[6])
+    # Number of channels to use for coherence analysis
+    num_channels: int = int(sys.argv[7])
+    # samples per second
+    samples_per_sec = int(sys.argv[8])
+    # method to use for coherence analysis
+    method = sys.argv[9]
     # Batch of files assuming jobs are run in parallel for files in batches.
     # Should be one if that is not the case.
     batch = int(sys.argv[10])
@@ -168,14 +87,21 @@ if __name__ == "__main__":
     spool = spool.chunk(time=averaging_window_length)
 
     # subselect n_channels number of channels starting from start_channel
-    spool = spool.select(distance=(first_channel,first_channel+channel_offset), samples=True)
+    channels = np.arange(
+        start_channel,
+        channel_offset * (start_channel + num_channels),
+        channel_offset,
+        dtype=int,
+    )
+
+    spool = spool.select(distance=(channels), samples=True)
 
     # another way to subselect channels
     # sub_patch = patch.select(distance=np.array([0, 12, 10, 9]), samples=True)
 
     contents = spool.contents
-    sample_interval = contents['time_step'][0].total_seconds()
-    sample_interval=1 / samples_per_sec
+    sample_interval = contents["time_step"][0].total_seconds()
+    sample_interval = 1 / samples_per_sec
 
     # use all the files if batch size is specified as 0
     # batch_size = len(data_files) if batch_size == 0 else batch_size
@@ -186,11 +112,11 @@ if __name__ == "__main__":
     metadata["averaging_window_length"] = averaging_window_length
     metadata["sub_window_length"] = sub_window_length
     metadata["overlap"] = overlap
-    metadata["first_channel"] = first_channel
+    metadata["first_channel"] = start_channel
     metadata["num_channels"] = num_channels
     metadata["channel_offset"] = channel_offset
     metadata["method"] = method
-    metadata["times"] = contents[['time_min', 'time_max']]
+    metadata["times"] = contents[["time_min", "time_max"]]
 
     # load the first file in the batch
     # if batch == 1:
@@ -215,11 +141,16 @@ if __name__ == "__main__":
     # the variables set up for first file of the batch above
     if method in METHODS:
         # perform coherence calculation on each patch
-        map_out = spool.map(lambda x: f.coherence(x.data.T, sub_window_length,
-                    overlap,
-                    sample_interval=sample_interval,
-                    method=method,))
-    
+        map_out = spool.map(
+            lambda x: f.coherence(
+                x.data.T,
+                sub_window_length,
+                overlap,
+                sample_interval=sample_interval,
+                method=method,
+            )
+        )
+
         detection_significance = np.stack([a[0] for a in map_out], axis=-1)
         eig_estimates = np.stack([a[1] for a in map_out], axis=-1)
     else:
