@@ -25,19 +25,78 @@ Example:
 - python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0
     3100 2000 200 1000 exact 1 0
 
-    
- 
-time_range = "('06/01/23 07:32:09', '06/01/23 07:32:10')"
 """
 
-from ast import literal_eval
-from datetime import datetime
 import os
 import pickle
 import sys
+from datetime import datetime
 
 import dascore as dc
 import numpy as np
+import typer
+
+def main(
+        data_path: str,
+        averaging_window_length: int,
+        sub_window_length: int, overlap: int,
+        channel_range: int,
+        channel_offset: int,
+        samples_per_sec: int,
+        method: str,
+        time_range: str,
+    ):
+    # list of methods to use for coherence analysis
+    METHODS: list[str] = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+
+    # record start time
+    start_time = datetime.now()
+
+    # Take inputs from the command line
+    # Path to the directory containing the data files
+    data_path: str = sys.argv[1]
+    # Path to the directory where the results will be saved
+    # save_location = sys.argv[12]
+    # Averaging window length in seconds
+    averaging_window_length: int = int(sys.argv[2])
+    # sub-window length in seconds
+    sub_window_length: int = int(sys.argv[3])
+    # overlap in seconds
+    overlap: int = int(sys.argv[4])
+    # channel to start from
+    start_channel: int = int(sys.argv[5])
+    # channels to skip in between
+    channel_offset: int = int(sys.argv[6])
+    # Number of channels to use for coherence analysis
+    num_channels: int = int(sys.argv[7])
+    # samples per second
+    samples_per_sec = int(sys.argv[8])
+    # method to use for coherence analysis
+    method = sys.argv[9]
+    # Batch of files assuming jobs are run in parallel for files in batches.
+    # Should be one if that is not the case.
+    batch = int(sys.argv[10])
+    # Number of files in batch. Should be 0 or number of files being
+    # considered if job is not done in batches.
+    batch_size = int(sys.argv[11])
+
+    # Path to the directory containing the data files
+    # data_basepath = "/beegfs/projects/martin/BradyHotspring"
+    # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
+
+    # Path to the directory where the results will be saved
+    save_location = "/u/st/by/aissah/scratch/coherence/coherence_test_results"
+    # "D:/CSM/Mines_Research/Test_data/"
+
+    # Get the file names of the data files by going through the folders
+    # contained in the base path and putting together the paths to files
+    # ending in .h5
+    spool = dc.spool(data_path)
+
+    # chunk the spool into averaging_window length 
+        
+
+
 
 if __name__ == "__main__":
     # record start time
@@ -49,24 +108,30 @@ if __name__ == "__main__":
     # Take inputs from the command line
     # Path to the directory containing the data files
     data_path: str = sys.argv[1]
-    # range of time to use for coherence analysis
-    time_range = literal_eval(sys.argv[2])
-    # range of channels to use for coherence analysis
-    channel_range = literal_eval(sys.argv[3])
-    # channels to skip in between
-    channel_offset: int = int(sys.argv[4])
+    # Path to the directory where the results will be saved
+    # save_location = sys.argv[12]
     # Averaging window length in seconds
-    averaging_window_length: int = int(sys.argv[5])
+    averaging_window_length: int = int(sys.argv[2])
     # sub-window length in seconds
-    sub_window_length: int = int(sys.argv[6])
+    sub_window_length: int = int(sys.argv[3])
     # overlap in seconds
-    overlap: int = int(sys.argv[7])
+    overlap: int = int(sys.argv[4])
+    # channel to start from
+    start_channel: int = int(sys.argv[5])
+    # channels to skip in between
+    channel_offset: int = int(sys.argv[6])
+    # Number of channels to use for coherence analysis
+    num_channels: int = int(sys.argv[7])
     # samples per second
     samples_per_sec = int(sys.argv[8])
     # method to use for coherence analysis
     method = sys.argv[9]
     # Batch of files assuming jobs are run in parallel for files in batches.
     # Should be one if that is not the case.
+    batch = int(sys.argv[10])
+    # Number of files in batch. Should be 0 or number of files being
+    # considered if job is not done in batches.
+    batch_size = int(sys.argv[11])
 
     # Path to the directory containing the data files
     # data_basepath = "/beegfs/projects/martin/BradyHotspring"

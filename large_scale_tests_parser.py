@@ -25,48 +25,61 @@ Example:
 - python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0
     3100 2000 200 1000 exact 1 0
 
-    
- 
-time_range = "('06/01/23 07:32:09', '06/01/23 07:32:10')"
 """
-
+import argparse
 from ast import literal_eval
 from datetime import datetime
 import os
 import pickle
-import sys
 
 import dascore as dc
 import numpy as np
+        
 
 if __name__ == "__main__":
     # record start time
     start_time = datetime.now()
 
-    # list of methods to use for coherence analysis
-    METHODS: list[str] = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+    # Define a list of methods to use for coherence analysis
+    METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
 
-    # Take inputs from the command line
-    # Path to the directory containing the data files
-    data_path: str = sys.argv[1]
-    # range of time to use for coherence analysis
-    time_range = literal_eval(sys.argv[2])
-    # range of channels to use for coherence analysis
-    channel_range = literal_eval(sys.argv[3])
-    # channels to skip in between
-    channel_offset: int = int(sys.argv[4])
-    # Averaging window length in seconds
-    averaging_window_length: int = int(sys.argv[5])
-    # sub-window length in seconds
-    sub_window_length: int = int(sys.argv[6])
-    # overlap in seconds
-    overlap: int = int(sys.argv[7])
-    # samples per second
-    samples_per_sec = int(sys.argv[8])
-    # method to use for coherence analysis
-    method = sys.argv[9]
-    # Batch of files assuming jobs are run in parallel for files in batches.
-    # Should be one if that is not the case.
+    # Initialize the parser
+    parser = argparse.ArgumentParser(description="Coherence Analysis Configuration")
+
+    # Add arguments
+    parser.add_argument('data_path', type=str, help='Path to the directory containing the data files')
+    parser.add_argument('result_path', type=str, help='Directory to save results')
+    parser.add_argument('time_range', type=str, help='Range of time to use for coherence analysis (in Python list format)')
+    parser.add_argument('channel_range', type=str, help='Range of channels to use for coherence analysis (in Python list format)')
+    parser.add_argument('channel_offset', type=int, help='Channels to skip in between')
+    parser.add_argument('averaging_window_length', type=int, help='Averaging window length in seconds')
+    parser.add_argument('sub_window_length', type=int, help='Sub-window length in seconds')
+    parser.add_argument('overlap', type=int, help='Overlap in seconds')
+    parser.add_argument('time_step', type=int, help='Seconds per sample', default=0.002)
+    parser.add_argument('method', type=str, choices=METHODS, help='Method to use for coherence analysis')
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Convert time_range and channel_range from strings to lists using literal_eval
+    time_range = [datetime.strptime(a, '%m/%d/%y %H:%M:%S') if a != ... else ... for a in literal_eval(args.time_range)]
+    channel_range = literal_eval(args.channel_range)
+
+    # Access the parsed arguments
+    data_path = args.data_path
+    save_location = args.result_path
+    channel_offset = args.channel_offset
+    averaging_window_length = args.averaging_window_length
+    sub_window_length = args.sub_window_length
+    overlap = args.overlap
+    time_step = args.time_step
+    method = args.method
+
+    # Example of accessing the parsed arguments
+    print(f"Data Path: {data_path}")
+    print(f"Time Range: {time_range}")
+    print(f"Channel Range: {channel_range}")
+    print(f"Method: {method}")
 
     # Path to the directory containing the data files
     # data_basepath = "/beegfs/projects/martin/BradyHotspring"
@@ -86,13 +99,14 @@ if __name__ == "__main__":
 
     # subselect n_channels number of channels starting from start_channel
     channels = np.arange(
-        start_channel,
-        channel_offset * (start_channel + num_channels),
+        channel_range[0],
+        channel_range[1],
         channel_offset,
         dtype=int,
     )
 
     spool = spool.select(distance=(channels), samples=True)
+    spool = spool.select(time=(channels), samples=True)
 
     # another way to subselect channels
     # sub_patch = patch.select(distance=np.array([0, 12, 10, 9]), samples=True)
@@ -101,20 +115,19 @@ if __name__ == "__main__":
     print(f"Data read in: {end_time - start_time}", flush=True)
 
     contents = spool.contents
-    sample_interval = contents["time_step"][0].total_seconds()
-    sample_interval = 1 / samples_per_sec
+    time_step = contents["time_step"][0].total_seconds()
+    # sample_interval = 1 / samples_per_sec
 
     # use all the files if batch size is specified as 0
     # batch_size = len(data_files) if batch_size == 0 else batch_size
 
     # create a dictionary to store the metadata of the files
     metadata = {}
-    metadata["sampling_rate"] = samples_per_sec
+    metadata["time_step"] = time_step
     metadata["averaging_window_length"] = averaging_window_length
     metadata["sub_window_length"] = sub_window_length
     metadata["overlap"] = overlap
-    metadata["first_channel"] = start_channel
-    metadata["num_channels"] = num_channels
+    metadata["channel_range"] = channel_range
     metadata["channel_offset"] = channel_offset
     metadata["method"] = method
     metadata["times"] = contents[["time_min", "time_max"]]
@@ -129,7 +142,7 @@ if __name__ == "__main__":
                 x.data.T,
                 sub_window_length,
                 overlap,
-                sample_interval=sample_interval,
+                sample_interval=time_step,
                 method=method,
             )
         )
