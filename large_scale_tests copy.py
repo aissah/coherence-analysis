@@ -118,24 +118,6 @@ if __name__ == "__main__":
     metadata["method"] = method
     metadata["times"] = contents[["time_min", "time_max"]]
 
-    # load the first file in the batch
-    # if batch == 1:
-    #     first_file_time = data_files[0][-15:-3]
-    #     data_files = data_files[:batch_size]
-    #     metadata["files"] = [a[-15:-3] for a in data_files]
-    # else:  # with more batches, append end of previous file for continuity
-    #     try:
-    #         data_files = data_files[(batch - 1) * batch_size - 1 : batch * batch_size]
-    #         metadata["files"] = [a[-15:-3] for a in data_files]
-    #     except IndexError:
-    #         data_files = data_files[(batch - 1) * batch_size - 1 :]
-    #         metadata["files"] = [a[-15:-3] for a in data_files]
-
-    # next_index = 0
-    # data, next_index, stop_sample_index = _next_data_window(
-    #     data_files, next_index, averaging_window_length, samples_per_sec
-    # )
-
     # work on files after first file in batch. This works exactly as we
     # handled the beginning of later batches. Then we keep appending to
     # the variables set up for first file of the batch above
@@ -160,52 +142,11 @@ if __name__ == "__main__":
     end_time = datetime.now()
     print(f"First file completed in: {end_time - start_time}", flush=True)
 
-    # for a in data_files[1:]:
-    # while next_index < len(data_files) - 1:
-    #     data, next_index, stop_sample_index = _next_data_window(
-    #         data_files,
-    #         next_index,
-    #         averaging_window_length,
-    #         samples_per_sec,
-    #         stop_sample_index,
-    #     )
-
-    #     if data.shape[1] == averaging_window_length * samples_per_sec:
-    #         detection_significance, eig_estimates = func.coherence(
-    #             data,
-    #             sub_window_length,
-    #             overlap,
-    #             sample_interval=1 / samples_per_sec,
-    #             method=method,
-    #         )
-
-    #         if detection_significance.shape == detection_significances.shape:
-    #             detection_significances = np.append(
-    #                 detection_significances[np.newaxis],
-    #                 detection_significance[np.newaxis],
-    #                 axis=0,
-    #             )
-    #         else:
-    #             detection_significances = np.append(
-    #                 detection_significances,
-    #                 detection_significance[np.newaxis],
-    #                 axis=0,
-    #             )
-
-    #         eig_estimatess = np.append(eig_estimatess, eig_estimates, axis=1)
-    #     else:
-    #         print(
-    #             f"Data length of {data.shape[1]} not the expected"
-    #             " {averaging_window_length * samples_per_sec} for analysis."
-    #             " {len(data_files) - next_index} files still remaining ",
-    #             flush=True,
-    #         )
-
-    # print(
-    #     f"Finished in: {datetime.now()-start_time} for {method} method."
-    #     " Saving to file...",
-    #     flush=True,
-    # )
+    print(
+        f"Finished in: {datetime.now()-start_time} for {method} method."
+        " Saving to file...",
+        flush=True,
+    )
 
     # save the results of detection significance, eigenvalues, and metadata to
     # different files
