@@ -22,8 +22,8 @@ python large_scale_test.py <data_location> <averaging_window_length>
 The script will then go through the files in the batch and perform coherence
 analysis on the data. The results are saved to a file for later analysis.
 Example:
-- python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0
-    3100 2000 200 1000 exact 1 0
+- python large_scale_tests_parser.py exact "D:\CSM\Mines_Research\Test_data\Port_Angeles"
+    "('06/01/23 07:32:09', ...)" "(..., ...)" 1 60 5 0 0.002
 
 """
 import argparse
@@ -47,16 +47,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Coherence Analysis Configuration")
 
     # Add arguments
+    parser.add_argument('method', type=str, choices=METHODS, help='Method to use for coherence analysis')
     parser.add_argument('data_path', type=str, help='Path to the directory containing the data files')
-    parser.add_argument('result_path', type=str, help='Directory to save results')
-    parser.add_argument('time_range', type=str, help='Range of time to use for coherence analysis (in Python list format)')
-    parser.add_argument('channel_range', type=str, help='Range of channels to use for coherence analysis (in Python list format)')
-    parser.add_argument('channel_offset', type=int, help='Channels to skip in between')
+    
     parser.add_argument('averaging_window_length', type=int, help='Averaging window length in seconds')
     parser.add_argument('sub_window_length', type=int, help='Sub-window length in seconds')
-    parser.add_argument('overlap', type=int, help='Overlap in seconds')
-    parser.add_argument('time_step', type=int, help='Seconds per sample', default=0.002)
-    parser.add_argument('method', type=str, choices=METHODS, help='Method to use for coherence analysis')
+    parser.add_argument('-o', '--overlap', type=int, help='Overlap in seconds', default=0)
+    parser.add_argument('-t', '--time_range', type=str, help='Range of time to use for coherence analysis (in Python list format)', default='(..., ...)')
+    parser.add_argument('-ch', '--channel_range', type=str, help='Range of channels to use for coherence analysis (in Python list format)', default='(0, ...)')
+    parser.add_argument('-ds', '--channel_offset', type=int, help='Channels to skip in between', default=1)
+    parser.add_argument('-dt', '--time_step', type=float, help='Sampling rate', default=0.002)
+    parser.add_argument('-r', '--result_path', type=str, help='Directory to save results', default='./data/results')
 
     # Parse arguments
     args = parser.parse_args()
@@ -80,18 +81,17 @@ if __name__ == "__main__":
     print(f"Time Range: {time_range}")
     print(f"Channel Range: {channel_range}")
     print(f"Method: {method}")
+    print(f"Result Path: {save_location}")
 
     # Path to the directory containing the data files
     # data_basepath = "/beegfs/projects/martin/BradyHotspring"
     # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
 
     # Path to the directory where the results will be saved
-    save_location = "/u/st/by/aissah/scratch/coherence/coherence_test_results"
+    # save_location = "/u/st/by/aissah/scratch/coherence/coherence_test_results"
     # "D:/CSM/Mines_Research/Test_data/"
 
-    # Get the file names of the data files by going through the folders
-    # contained in the base path and putting together the paths to files
-    # ending in .h5
+    # read the data files using the spool function from dascore
     spool = dc.spool(data_path)
 
     # chunk the spool into averaging_window length
@@ -99,8 +99,8 @@ if __name__ == "__main__":
 
     # subselect n_channels number of channels starting from start_channel
     channels = np.arange(
-        channel_range[0],
-        channel_range[1],
+        channel_range[0] if channel_range[0] is not ... else 0,
+        channel_range[1] if channel_range[1] is not ... else spool[0].data.shape[1],
         channel_offset,
         dtype=int,
     )
@@ -113,6 +113,8 @@ if __name__ == "__main__":
 
     end_time = datetime.now()
     print(f"Data read in: {end_time - start_time}", flush=True)
+
+    exit()
 
     contents = spool.contents
     time_step = contents["time_step"][0].total_seconds()
@@ -163,21 +165,21 @@ if __name__ == "__main__":
     # different files
     savename = os.path.join(
         save_location,
-        f"{method}_detection_significance_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
+        f"{method}_detection_significance_{contents[['time_min']][0]}_{contents[['time_max']][-1]}.pkl",
     )
     with open(savename, "wb") as f:
         pickle.dump(detection_significance, f)
 
     savename = os.path.join(
         save_location,
-        f"{method}_eig_estimatess_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
+        f"{method}_eig_estimatess_{contents[['time_min']][0]}_{contents[['time_max']][-1]}.pkl",
     )
     with open(savename, "wb") as f:
         pickle.dump(eig_estimates, f)
 
     savename = os.path.join(
         save_location,
-        f"{method}_metadata_{metadata['files'][0]}_{metadata['files'][-1]}.pkl",
+        f"{method}_metadata_{contents[['time_min']][0]}_{contents[['time_max']][-1]}.pkl",
     )
     with open(savename, "wb") as f:
         pickle.dump(metadata, f)
