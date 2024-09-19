@@ -102,7 +102,7 @@ class coherence_analysis:
             "--result_path",
             type=str,
             help="Directory to save results",
-            default=os.path.join( os.path.dirname( __file__ ), '../data/results' ),
+            default=os.path.join( os.path.dirname( __file__ ), os.pardir, 'data/results' ),
         )
 
         # Parse arguments
