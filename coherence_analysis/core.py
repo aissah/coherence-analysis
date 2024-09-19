@@ -102,7 +102,7 @@ class coherence_analysis:
             "--result_path",
             type=str,
             help="Directory to save results",
-            default=os.path.join( os.path.dirname( __file__ ), os.pardir, 'data/results' ),
+            default=os.path.join(os.path.dirname(__file__), os.pardir, "data/results"),
         )
 
         # Parse arguments
@@ -184,36 +184,43 @@ class coherence_analysis:
         metadata["times"] = self.contents[["time_min", "time_max"]]
 
         print(self.contents[["time_min", "time_max"]])
-        print(self.contents["time_min"][0], self.contents["time_max"][self.contents.index[-1]])
+        print(
+            self.contents["time_min"][0],
+            self.contents["time_max"][self.contents.index[-1]],
+        )
 
-        start_time = str(self.contents["time_min"][0]).replace(" ", "_").replace(":", "_").replace(".", "_")
-        end_time = str(self.contents["time_max"][self.contents.index[-1]]).replace(" ", "_").replace(":", "_").replace(".", "_")
+        start_time = (
+            str(self.contents["time_min"][0])
+            .replace(" ", "_")
+            .replace(":", "_")
+            .replace(".", "_")
+        )
+        end_time = (
+            str(self.contents["time_max"][self.contents.index[-1]])
+            .replace(" ", "_")
+            .replace(":", "_")
+            .replace(".", "_")
+        )
 
         # save the results of detection significance, eigenvalues,
         # and metadata to different files
         savename = os.path.join(
             self.save_location,
-            f"{self.method}_detection_significance_"
-            f"{start_time}_"
-            f"{end_time}.pkl"
+            f"{self.method}_detection_significance_" f"{start_time}_" f"{end_time}.pkl",
         )
         with open(savename, "wb") as f:
             pickle.dump(self.detection_significance, f)
 
         savename = os.path.join(
             self.save_location,
-            f"{self.method}_eig_estimatess_"
-            f"{start_time}_"
-            f"{end_time}.pkl"
+            f"{self.method}_eig_estimatess_" f"{start_time}_" f"{end_time}.pkl",
         )
         with open(savename, "wb") as f:
             pickle.dump(self.eig_estimates, f)
 
         savename = os.path.join(
             self.save_location,
-            f"{self.method}_metadata_"
-            f"{start_time}_"
-            f"{end_time}.pkl"
+            f"{self.method}_metadata_" f"{start_time}_" f"{end_time}.pkl",
         )
         with open(savename, "wb") as f:
             pickle.dump(metadata, f)
