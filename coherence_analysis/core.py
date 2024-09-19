@@ -183,8 +183,8 @@ class coherence_analysis:
         metadata["method"] = self.method
         metadata["times"] = self.contents[["time_min", "time_max"]]
 
-        # save the results of detection significance, eigenvalues, and metadata to
-        # different files
+        # save the results of detection significance, eigenvalues,
+        # and metadata to different files
         savename = os.path.join(
             self.save_location,
             f"""{self.method}_detection_significance_,
@@ -210,7 +210,7 @@ class coherence_analysis:
             {self.contents[['time_max']][-1]}.pkl""",
         )
         with open(savename, "wb") as f:
-            pickle.dump(self.metadata, f)
+            pickle.dump(metadata, f)
 
 
 if __name__ == "__main__":
