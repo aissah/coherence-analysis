@@ -59,7 +59,7 @@ class coherence_analysis:
         parser.add_argument('-ch', '--channel_range', type=str, help='Range of channels to use for coherence analysis (in Python list format)', default='(0, ...)')
         parser.add_argument('-ds', '--channel_offset', type=int, help='Channels to skip in between', default=1)
         parser.add_argument('-dt', '--time_step', type=float, help='Sampling rate', default=0.002)
-        parser.add_argument('-r', '--result_path', type=str, help='Directory to save results', default='./data/results')
+        parser.add_argument('-r', '--result_path', type=str, help='Directory to save results', default='../data/results')
 
         # Parse arguments
         args = parser.parse_args()
@@ -105,19 +105,6 @@ class coherence_analysis:
         self.contents = self.spool.get_contents()
         self.time_step = self.contents["time_step"][0].total_seconds()
 
-        # use all the files if batch size is specified as 0
-        # batch_size = len(data_files) if batch_size == 0 else batch_size
-
-        # create a dictionary to store the metadata of the files
-        self.metadata = {}
-        self.metadata["time_step"] = self.time_step
-        self.metadata["averaging_window_length"] = self.averaging_window_length
-        self.metadata["sub_window_length"] = self.sub_window_length
-        self.metadata["overlap"] = self.overlap
-        self.metadata["channel_range"] = self.channel_range
-        self.metadata["channel_offset"] = self.channel_offset
-        self.metadata["method"] = self.method
-
     def run(self):
         # perform coherence calculation on each patch
         map_out = coherence_instance.spool.map(
@@ -154,7 +141,7 @@ class coherence_analysis:
             {self.contents[['time_max']][-1]}.pkl""",
         )
         with open(savename, "wb") as f:
-            pickle.dump(detection_significance, f)
+            pickle.dump(self.detection_significance, f)
 
         savename = os.path.join(
             self.save_location,
@@ -163,7 +150,7 @@ class coherence_analysis:
             {self.contents[['time_max']][-1]}.pkl""",
         )
         with open(savename, "wb") as f:
-            pickle.dump(eig_estimates, f)
+            pickle.dump(self.eig_estimates, f)
 
         savename = os.path.join(
             self.save_location,
@@ -179,161 +166,37 @@ if __name__ == "__main__":
     # record start time
     start_time = datetime.now()
 
+    # Initialize the coherence_analysis instance
     coherence_instance = coherence_analysis()
+
+    # Parse the command line arguments
     coherence_instance._parse_args()
-    
 
-    # # Define a list of methods to use for coherence analysis
-    # METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
-
-    # # Initialize the parser
-    # parser = argparse.ArgumentParser(description="Coherence Analysis Configuration")
-
-    # # Add arguments
-    # parser.add_argument('method', type=str, choices=METHODS, help='Method to use for coherence analysis')
-    # parser.add_argument('data_path', type=str, help='Path to the directory containing the data files')
-    
-    # parser.add_argument('averaging_window_length', type=int, help='Averaging window length in seconds')
-    # parser.add_argument('sub_window_length', type=int, help='Sub-window length in seconds')
-    # parser.add_argument('-o', '--overlap', type=int, help='Overlap in seconds', default=0)
-    # parser.add_argument('-t', '--time_range', type=str, help='Range of time to use for coherence analysis (in Python list format)', default='(..., ...)')
-    # parser.add_argument('-ch', '--channel_range', type=str, help='Range of channels to use for coherence analysis (in Python list format)', default='(0, ...)')
-    # parser.add_argument('-ds', '--channel_offset', type=int, help='Channels to skip in between', default=1)
-    # parser.add_argument('-dt', '--time_step', type=float, help='Sampling rate', default=0.002)
-    # parser.add_argument('-r', '--result_path', type=str, help='Directory to save results', default='./data/results')
-
-    # # Parse arguments
-    # args = parser.parse_args()
-
-    # # Convert time_range and channel_range from strings to lists using literal_eval
-    # time_range = [datetime.strptime(a, '%m/%d/%y %H:%M:%S') if a != ... else ... for a in literal_eval(args.time_range)]
-    # channel_range = literal_eval(args.channel_range)
-
-    # # Access the parsed arguments
-    # data_path = args.data_path
-    # save_location = args.result_path
-    # channel_offset = args.channel_offset
-    # averaging_window_length = args.averaging_window_length
-    # sub_window_length = args.sub_window_length
-    # overlap = args.overlap
-    # time_step = args.time_step
-    # method = args.method
-
-    # Example of accessing the parsed arguments
+    # Print the parsed arguments
     print(f"Data Path: {coherence_instance.data_path}")
     print(f"Time Range: {coherence_instance.time_range}")
     print(f"Channel Range: {coherence_instance.channel_range}")
     print(f"Method: {coherence_instance.method}")
     print(f"Result Path: {coherence_instance.save_location}")
 
+    # Read the data
     print("Reading data...", flush=True)
     coherence_instance.read_data()
-
-    # Path to the directory containing the data files
-    # data_basepath = "/beegfs/projects/martin/BradyHotspring"
-    # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
-
-    # Path to the directory where the results will be saved
-    # save_location = "/u/st/by/aissah/scratch/coherence/coherence_test_results"
-    # "D:/CSM/Mines_Research/Test_data/"
-
-    # read the data files using the spool function from dascore
-    # spool = dc.spool(coherence_instance.data_path)
-
-    # # chunk the spool into averaging_window length
-    # spool = spool.chunk(time=coherence_instance.averaging_window_length)
-
-    # # subselect n_channels number of channels starting from start_channel
-    # channels = np.arange(
-    #     coherence_instance.channel_range[0] if coherence_instance.channel_range[0] is not ... else 0,
-    #     coherence_instance.channel_range[1] if coherence_instance.channel_range[1] is not ... else spool[0].data.shape[1],
-    #     coherence_instance.channel_offset,
-    #     dtype=int,
-    # )
-
-    # spool = spool.select(distance=(channels), samples=True)
-    # spool = spool.select(time=coherence_instance.time_range, samples=True)
-
-    # another way to subselect channels
-    # sub_patch = patch.select(distance=np.array([0, 12, 10, 9]), samples=True)
 
     end_time = datetime.now()
     print(f"Data read in: {end_time - start_time}", flush=True)
 
-    exit()
+    # run the coherence analysis
+    print("Running coherence analysis...", flush=True)
+    coherence_instance.run()
 
-    # contents = coherence_instance.spool.contents
-    # coherence_instance.time_step = contents["time_step"][0].total_seconds()
-    # sample_interval = 1 / samples_per_sec
-
-    # use all the files if batch size is specified as 0
-    # batch_size = len(data_files) if batch_size == 0 else batch_size
-
-    
-
-    # work on files after first file in batch. This works exactly as we
-    # handled the beginning of later batches. Then we keep appending to
-    # the variables set up for first file of the batch above
-
-    # perform coherence calculation on each patch
-    map_out = coherence_instance.spool.map(
-        lambda x: coherence(
-            x.data.T,
-            coherence_instance.sub_window_length,
-            coherence_instance.overlap,
-            sample_interval=coherence_instance.time_step,
-            method=coherence_instance.method,
-        )
-    )
-
-    detection_significance = np.stack([a[0] for a in map_out], axis=-1)
-    eig_estimates = np.stack([a[1] for a in map_out], axis=-1)
-
+    # save the results
     print(
-        f"Finished in: {datetime.now()-start_time} for {method} method."
-        " Saving to file...",
+        f"Finished in: {datetime.now()-start_time} for {coherence_instance.method} method."
+        " Saving results...",
         flush=True,
     )
-
-    # create a dictionary to store metadata
-    metadata = {}
-    metadata["time_step"] = time_step
-    metadata["averaging_window_length"] = averaging_window_length
-    metadata["sub_window_length"] = sub_window_length
-    metadata["overlap"] = overlap
-    metadata["channel_range"] = channel_range
-    metadata["channel_offset"] = channel_offset
-    metadata["method"] = method
-    metadata["times"] = contents[["time_min", "time_max"]]
-
-    # save the results of detection significance, eigenvalues, and metadata to
-    # different files
-    savename = os.path.join(
-        coherence_instance.save_location,
-        f"""{method}_detection_significance_,
-        {coherence_instance.contents[['time_min']][0]}_,
-        {coherence_instance.contents[['time_max']][-1]}.pkl""",
-    )
-    with open(savename, "wb") as f:
-        pickle.dump(detection_significance, f)
-
-    savename = os.path.join(
-        coherence_instance.save_location,
-        f"""{method}_eig_estimatess_,
-        {coherence_instance.contents[['time_min']][0]}_,
-        {coherence_instance.contents[['time_max']][-1]}.pkl""",
-    )
-    with open(savename, "wb") as f:
-        pickle.dump(eig_estimates, f)
-
-    savename = os.path.join(
-        coherence_instance.save_location,
-        f"""{method}_metadata_,
-        {coherence_instance.contents[['time_min']][0]}_,
-        {coherence_instance.contents[['time_max']][-1]}.pkl""",
-    )
-    with open(savename, "wb") as f:
-        pickle.dump(coherence_instance.metadata, f)
+    coherence_instance.save_results()
 
     end_time = datetime.now()
     print(f"Total duration: {end_time - start_time}", flush=True)
