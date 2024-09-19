@@ -93,7 +93,7 @@ class coherence_analysis:
         # subselect n_channels number of channels starting from start_channel
         channels = np.arange(
             self.channel_range[0] if self.channel_range[0] is not ... else 0,
-            self.channel_range[1] if self.channel_range[1] is not ... else spool[0].data.shape[1],
+            self.channel_range[1] if self.channel_range[1] is not ... else self.spool[0].data.shape[1],
             self.channel_offset,
             dtype=int,
         )
@@ -102,9 +102,8 @@ class coherence_analysis:
         self.spool = self.spool.select(distance=(channels), samples=True)
         self.spool = self.spool.select(time=self.time_range, samples=True)
 
-        contents = self.spool.contents
-        self.time_step = contents["time_step"][0].total_seconds()
-        # sample_interval = 1 / samples_per_sec
+        self.contents = self.spool.get_contents()
+        self.time_step = self.contents["time_step"][0].total_seconds()
 
         # use all the files if batch size is specified as 0
         # batch_size = len(data_files) if batch_size == 0 else batch_size
@@ -119,7 +118,61 @@ class coherence_analysis:
         self.metadata["channel_offset"] = self.channel_offset
         self.metadata["method"] = self.method
 
-        
+    def run(self):
+        # perform coherence calculation on each patch
+        map_out = coherence_instance.spool.map(
+            lambda x: coherence(
+                x.data.T,
+                coherence_instance.sub_window_length,
+                coherence_instance.overlap,
+                sample_interval=coherence_instance.time_step,
+                method=coherence_instance.method,
+            )
+        )
+
+        self.detection_significance = np.stack([a[0] for a in map_out], axis=-1)
+        self.eig_estimates = np.stack([a[1] for a in map_out], axis=-1)
+
+    def save_results(self):
+        # create a dictionary to store metadata
+        metadata = {}
+        metadata["time_step"] = self.time_step
+        metadata["averaging_window_length"] = self.averaging_window_length
+        metadata["sub_window_length"] = self.sub_window_length
+        metadata["overlap"] = self.overlap
+        metadata["channel_range"] = self.channel_range
+        metadata["channel_offset"] = self.channel_offset
+        metadata["method"] = self.method
+        metadata["times"] = self.contents[["time_min", "time_max"]]
+
+        # save the results of detection significance, eigenvalues, and metadata to
+        # different files
+        savename = os.path.join(
+            self.save_location,
+            f"""{self.method}_detection_significance_,
+            {self.contents[['time_min']][0]}_,
+            {self.contents[['time_max']][-1]}.pkl""",
+        )
+        with open(savename, "wb") as f:
+            pickle.dump(detection_significance, f)
+
+        savename = os.path.join(
+            self.save_location,
+            f"""{self.method}_eig_estimatess_,
+            {self.contents[['time_min']][0]}_,
+            {self.contents[['time_max']][-1]}.pkl""",
+        )
+        with open(savename, "wb") as f:
+            pickle.dump(eig_estimates, f)
+
+        savename = os.path.join(
+            self.save_location,
+            f"""{self.method}_metadata_,
+            {self.contents[['time_min']][0]}_,
+            {self.contents[['time_max']][-1]}.pkl""",
+        )
+        with open(savename, "wb") as f:
+            pickle.dump(self.metadata, f)
 
 
 if __name__ == "__main__":
@@ -128,6 +181,7 @@ if __name__ == "__main__":
 
     coherence_instance = coherence_analysis()
     coherence_instance._parse_args()
+    
 
     # # Define a list of methods to use for coherence analysis
     # METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
@@ -172,6 +226,9 @@ if __name__ == "__main__":
     print(f"Method: {coherence_instance.method}")
     print(f"Result Path: {coherence_instance.save_location}")
 
+    print("Reading data...", flush=True)
+    coherence_instance.read_data()
+
     # Path to the directory containing the data files
     # data_basepath = "/beegfs/projects/martin/BradyHotspring"
     # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
@@ -181,21 +238,21 @@ if __name__ == "__main__":
     # "D:/CSM/Mines_Research/Test_data/"
 
     # read the data files using the spool function from dascore
-    spool = dc.spool(coherence_instance.data_path)
+    # spool = dc.spool(coherence_instance.data_path)
 
-    # chunk the spool into averaging_window length
-    spool = spool.chunk(time=coherence_instance.averaging_window_length)
+    # # chunk the spool into averaging_window length
+    # spool = spool.chunk(time=coherence_instance.averaging_window_length)
 
-    # subselect n_channels number of channels starting from start_channel
-    channels = np.arange(
-        coherence_instance.channel_range[0] if coherence_instance.channel_range[0] is not ... else 0,
-        coherence_instance.channel_range[1] if coherence_instance.channel_range[1] is not ... else spool[0].data.shape[1],
-        coherence_instance.channel_offset,
-        dtype=int,
-    )
+    # # subselect n_channels number of channels starting from start_channel
+    # channels = np.arange(
+    #     coherence_instance.channel_range[0] if coherence_instance.channel_range[0] is not ... else 0,
+    #     coherence_instance.channel_range[1] if coherence_instance.channel_range[1] is not ... else spool[0].data.shape[1],
+    #     coherence_instance.channel_offset,
+    #     dtype=int,
+    # )
 
-    spool = spool.select(distance=(channels), samples=True)
-    spool = spool.select(time=coherence_instance.time_range, samples=True)
+    # spool = spool.select(distance=(channels), samples=True)
+    # spool = spool.select(time=coherence_instance.time_range, samples=True)
 
     # another way to subselect channels
     # sub_patch = patch.select(distance=np.array([0, 12, 10, 9]), samples=True)
@@ -205,14 +262,40 @@ if __name__ == "__main__":
 
     exit()
 
-    contents = coherence_instance.spool.contents
-    time_step = contents["time_step"][0].total_seconds()
+    # contents = coherence_instance.spool.contents
+    # coherence_instance.time_step = contents["time_step"][0].total_seconds()
     # sample_interval = 1 / samples_per_sec
 
     # use all the files if batch size is specified as 0
     # batch_size = len(data_files) if batch_size == 0 else batch_size
 
-    # create a dictionary to store the metadata of the files
+    
+
+    # work on files after first file in batch. This works exactly as we
+    # handled the beginning of later batches. Then we keep appending to
+    # the variables set up for first file of the batch above
+
+    # perform coherence calculation on each patch
+    map_out = coherence_instance.spool.map(
+        lambda x: coherence(
+            x.data.T,
+            coherence_instance.sub_window_length,
+            coherence_instance.overlap,
+            sample_interval=coherence_instance.time_step,
+            method=coherence_instance.method,
+        )
+    )
+
+    detection_significance = np.stack([a[0] for a in map_out], axis=-1)
+    eig_estimates = np.stack([a[1] for a in map_out], axis=-1)
+
+    print(
+        f"Finished in: {datetime.now()-start_time} for {method} method."
+        " Saving to file...",
+        flush=True,
+    )
+
+    # create a dictionary to store metadata
     metadata = {}
     metadata["time_step"] = time_step
     metadata["averaging_window_length"] = averaging_window_length
@@ -223,55 +306,34 @@ if __name__ == "__main__":
     metadata["method"] = method
     metadata["times"] = contents[["time_min", "time_max"]]
 
-    # work on files after first file in batch. This works exactly as we
-    # handled the beginning of later batches. Then we keep appending to
-    # the variables set up for first file of the batch above
-    if method in METHODS:
-        # perform coherence calculation on each patch
-        map_out = spool.map(
-            lambda x: coherence(
-                x.data.T,
-                coherence_instance.sub_window_length,
-                coherence_instance.overlap,
-                sample_interval=time_step,
-                method=coherence_instance.method,
-            )
-        )
-
-        detection_significance = np.stack([a[0] for a in map_out], axis=-1)
-        eig_estimates = np.stack([a[1] for a in map_out], axis=-1)
-    else:
-        error_msg = f"Method {method} not available for coherence analysis"
-        raise ValueError(error_msg)
-
-    print(
-        f"Finished in: {datetime.now()-start_time} for {method} method."
-        " Saving to file...",
-        flush=True,
-    )
-
     # save the results of detection significance, eigenvalues, and metadata to
     # different files
     savename = os.path.join(
-        save_location,
-        f"{method}_detection_significance_{contents[['time_min']][0]}_{contents[['time_max']][-1]}.pkl",
+        coherence_instance.save_location,
+        f"""{method}_detection_significance_,
+        {coherence_instance.contents[['time_min']][0]}_,
+        {coherence_instance.contents[['time_max']][-1]}.pkl""",
     )
     with open(savename, "wb") as f:
         pickle.dump(detection_significance, f)
 
     savename = os.path.join(
-        save_location,
-        f"{method}_eig_estimatess_{contents[['time_min']][0]}_{contents[['time_max']][-1]}.pkl",
+        coherence_instance.save_location,
+        f"""{method}_eig_estimatess_,
+        {coherence_instance.contents[['time_min']][0]}_,
+        {coherence_instance.contents[['time_max']][-1]}.pkl""",
     )
     with open(savename, "wb") as f:
         pickle.dump(eig_estimates, f)
 
     savename = os.path.join(
-        save_location,
-        f"{method}_metadata_{contents[['time_min']][0]}_{contents[['time_max']][-1]}.pkl",
+        coherence_instance.save_location,
+        f"""{method}_metadata_,
+        {coherence_instance.contents[['time_min']][0]}_,
+        {coherence_instance.contents[['time_max']][-1]}.pkl""",
     )
     with open(savename, "wb") as f:
-        pickle.dump(metadata, f)
+        pickle.dump(coherence_instance.metadata, f)
 
     end_time = datetime.now()
     print(f"Total duration: {end_time - start_time}", flush=True)
