@@ -52,7 +52,6 @@ class coherence_analysis:
         # Add arguments
         parser.add_argument('method', type=str, choices=METHODS, help='Method to use for coherence analysis')
         parser.add_argument('data_path', type=str, help='Path to the directory containing the data files')
-        
         parser.add_argument('averaging_window_length', type=int, help='Averaging window length in seconds')
         parser.add_argument('sub_window_length', type=int, help='Sub-window length in seconds')
         parser.add_argument('-o', '--overlap', type=int, help='Overlap in seconds', default=0)
@@ -79,18 +78,17 @@ class coherence_analysis:
         self.time_step = args.time_step
         self.method = args.method
 
-    def run(self):
-        # record start time
-        start_time = datetime.now()
+        if self.method not in METHODS:
+            error_msg = f"Method {self.method} not available for coherence analysis"
+            raise ValueError(error_msg)
 
-        # Define a list of methods to use for coherence analysis
-        METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+    def read_data(self):
 
         # read the data files using the spool function from dascore
-        spool = dc.spool(self.data_path)
+        self.spool = dc.spool(self.data_path)
 
         # chunk the spool into averaging_window length
-        spool = spool.chunk(time=self.averaging_window_length)
+        self.spool = self.spool.chunk(time=self.averaging_window_length)
 
         # subselect n_channels number of channels starting from start_channel
         channels = np.arange(
@@ -100,25 +98,27 @@ class coherence_analysis:
             dtype=int,
         )
 
-        spool = spool.select(distance=(channels), samples=True)
-        spool = spool.select(time=self.time_range, samples=True)
+        # subsample the spool to select the channels and time range
+        self.spool = self.spool.select(distance=(channels), samples=True)
+        self.spool = self.spool.select(time=self.time_range, samples=True)
 
-        contents = spool.contents
-        time_step = contents["time_step"][0].total_seconds()
+        contents = self.spool.contents
+        self.time_step = contents["time_step"][0].total_seconds()
         # sample_interval = 1 / samples_per_sec
 
         # use all the files if batch size is specified as 0
         # batch_size = len(data_files) if batch_size == 0 else batch_size
 
         # create a dictionary to store the metadata of the files
-        metadata = {}
-        metadata["time_step"] = time_step
-        metadata["averaging_window_length"] = self.averaging_window_length
-        metadata["sub_window_length"] = self.sub_window_length
-        metadata["overlap"] = self.overlap
-        metadata["channel_range"] = self.channel_range
-        metadata["channel_offset"] = self.channel_offset
-        metadata["method"] = self
+        self.metadata = {}
+        self.metadata["time_step"] = self.time_step
+        self.metadata["averaging_window_length"] = self.averaging_window_length
+        self.metadata["sub_window_length"] = self.sub_window_length
+        self.metadata["overlap"] = self.overlap
+        self.metadata["channel_range"] = self.channel_range
+        self.metadata["channel_offset"] = self.channel_offset
+        self.metadata["method"] = self.method
+
         
 
 
@@ -205,7 +205,7 @@ if __name__ == "__main__":
 
     exit()
 
-    contents = spool.contents
+    contents = coherence_instance.spool.contents
     time_step = contents["time_step"][0].total_seconds()
     # sample_interval = 1 / samples_per_sec
 
