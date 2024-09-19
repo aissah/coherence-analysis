@@ -26,16 +26,17 @@ Example:
     "('06/01/23 07:32:09', ...)" "(..., ...)" 1 60 5 0 0.002
 
 """
+
 import argparse
-from ast import literal_eval
-from datetime import datetime
 import os
 import pickle
+from ast import literal_eval
+from datetime import datetime
 
 import dascore as dc
 import numpy as np
-
 from utils import coherence
+
 
 class coherence_analysis:
 
@@ -50,22 +51,68 @@ class coherence_analysis:
         parser = argparse.ArgumentParser(description="Coherence Analysis Configuration")
 
         # Add arguments
-        parser.add_argument('method', type=str, choices=METHODS, help='Method to use for coherence analysis')
-        parser.add_argument('data_path', type=str, help='Path to the directory containing the data files')
-        parser.add_argument('averaging_window_length', type=int, help='Averaging window length in seconds')
-        parser.add_argument('sub_window_length', type=int, help='Sub-window length in seconds')
-        parser.add_argument('-o', '--overlap', type=int, help='Overlap in seconds', default=0)
-        parser.add_argument('-t', '--time_range', type=str, help='Range of time to use for coherence analysis (in Python list format)', default='(..., ...)')
-        parser.add_argument('-ch', '--channel_range', type=str, help='Range of channels to use for coherence analysis (in Python list format)', default='(0, ...)')
-        parser.add_argument('-ds', '--channel_offset', type=int, help='Channels to skip in between', default=1)
-        parser.add_argument('-dt', '--time_step', type=float, help='Sampling rate', default=0.002)
-        parser.add_argument('-r', '--result_path', type=str, help='Directory to save results', default='../data/results')
+        parser.add_argument(
+            "method",
+            type=str,
+            choices=METHODS,
+            help="Method to use for coherence analysis",
+        )
+        parser.add_argument(
+            "data_path",
+            type=str,
+            help="Path to the directory containing the data files",
+        )
+        parser.add_argument(
+            "averaging_window_length",
+            type=int,
+            help="Averaging window length in seconds",
+        )
+        parser.add_argument(
+            "sub_window_length", type=int, help="Sub-window length in seconds"
+        )
+        parser.add_argument(
+            "-o", "--overlap", type=int, help="Overlap in seconds", default=0
+        )
+        parser.add_argument(
+            "-t",
+            "--time_range",
+            type=str,
+            help="Range of time to use for coherence analysis (in Python list format)",
+            default="(..., ...)",
+        )
+        parser.add_argument(
+            "-ch",
+            "--channel_range",
+            type=str,
+            help="Range of channels to use for coherence analysis (in Python list format)",
+            default="(0, ...)",
+        )
+        parser.add_argument(
+            "-ds",
+            "--channel_offset",
+            type=int,
+            help="Channels to skip in between",
+            default=1,
+        )
+        parser.add_argument(
+            "-dt", "--time_step", type=float, help="Sampling rate", default=0.002
+        )
+        parser.add_argument(
+            "-r",
+            "--result_path",
+            type=str,
+            help="Directory to save results",
+            default="../data/results",
+        )
 
         # Parse arguments
         args = parser.parse_args()
 
         # Convert time_range and channel_range from strings to lists using literal_eval
-        self.time_range = [datetime.strptime(a, '%m/%d/%y %H:%M:%S') if a != ... else ... for a in literal_eval(args.time_range)]
+        self.time_range = [
+            datetime.strptime(a, "%m/%d/%y %H:%M:%S") if a != ... else ...
+            for a in literal_eval(args.time_range)
+        ]
         self.channel_range = literal_eval(args.channel_range)
 
         # Access the parsed arguments
@@ -93,7 +140,11 @@ class coherence_analysis:
         # subselect n_channels number of channels starting from start_channel
         channels = np.arange(
             self.channel_range[0] if self.channel_range[0] is not ... else 0,
-            self.channel_range[1] if self.channel_range[1] is not ... else self.spool[0].data.shape[1],
+            (
+                self.channel_range[1]
+                if self.channel_range[1] is not ...
+                else self.spool[0].data.shape[1]
+            ),
             self.channel_offset,
             dtype=int,
         )

@@ -30,11 +30,11 @@ Example:
 time_range = "('06/01/23 07:32:09', '06/01/23 07:32:10')"
 """
 
-from ast import literal_eval
-from datetime import datetime
 import os
 import pickle
 import sys
+from ast import literal_eval
+from datetime import datetime
 
 import dascore as dc
 import numpy as np
