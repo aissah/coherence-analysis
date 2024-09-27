@@ -100,7 +100,14 @@ if __name__ == "__main__":
     start_time = datetime.now()
 
     # list of methods to use for coherence analysis
-    METHODS: list[str] = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+    METHODS: list[str] = [
+        "exact",
+        "qr",
+        "svd",
+        "rsvd",
+        "power",
+        "qr iteration",
+    ]
 
     # Take inputs from the command line
     # Path to the directory containing the data files

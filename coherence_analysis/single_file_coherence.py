@@ -26,7 +26,9 @@ save_location = Path(
 start_time = datetime.now()
 if __name__ == "__main__":
     file = sys.argv[1]
-    averaging_window_length = int(sys.argv[2])  # Averaging window length in seconds
+    averaging_window_length = int(
+        sys.argv[2]
+    )  # Averaging window length in seconds
     sub_window_length = int(sys.argv[3])  # sub-window length in seconds
     overlap = int(sys.argv[4])  # overlap in seconds
     first_channel = int(sys.argv[5])  # first channel
@@ -43,8 +45,9 @@ if __name__ == "__main__":
     if method in METHODS:  # method == "qr":
         detection_significance, eig_estimates = func.coherence(
             data[
-                first_channel : channel_offset
-                + first_channel : int(channel_offset / num_channels)
+                first_channel : channel_offset + first_channel : int(
+                    channel_offset / num_channels
+                )
             ],
             sub_window_length,
             overlap,
@@ -56,7 +59,9 @@ if __name__ == "__main__":
         #     "eig_estimates": eig_estimates,
         # }
     else:
-        raise ValueError(f"Invalid method: {method}. Valid methods are: {METHODS}")
+        raise ValueError(
+            f"Invalid method: {method}. Valid methods are: {METHODS}"
+        )
 
     # print(detection_significance.shape, flush=True)
     print(
@@ -64,10 +69,13 @@ if __name__ == "__main__":
         flush=True,
     )
     savename = (
-        save_location / f"{method}_detection_significance_{str(file)[-15:-3]}.pkl"
+        save_location
+        / f"{method}_detection_significance_{str(file)[-15:-3]}.pkl"
     )
     with open(savename, "wb") as f:
         pickle.dump(detection_significance, f)
-    savename = save_location / f"{method}_eig_estimates_{str(file)[-15:-3]}.pkl"
+    savename = (
+        save_location / f"{method}_eig_estimates_{str(file)[-15:-3]}.pkl"
+    )
     with open(savename, "wb") as f:
         pickle.dump(eig_estimates, f)

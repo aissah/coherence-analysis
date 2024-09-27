@@ -79,8 +79,9 @@ def _next_data_window(
     data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
     data_len = data.shape[1]
     data = data[
-        first_channel : channel_offset
-        + first_channel : int(channel_offset / num_channels),
+        first_channel : channel_offset + first_channel : int(
+            channel_offset / num_channels
+        ),
         start_sample_index : start_sample_index + total_window_length,
     ]
 
@@ -103,14 +104,17 @@ def _next_data_window(
         )
         next_data = func.rm_laser_drift(next_data)
         next_data = next_data[
-            first_channel : channel_offset
-            + first_channel : int(channel_offset / num_channels)
+            first_channel : channel_offset + first_channel : int(
+                channel_offset / num_channels
+            )
         ]
         data = np.append(data, next_data[:, :window_deficit], axis=1)
 
         if window_deficit < next_data.shape[1]:
             stop_sample_index = window_deficit
-        elif window_deficit == next_data.shape[1] or next_index == num_files - 1:
+        elif (
+            window_deficit == next_data.shape[1] or next_index == num_files - 1
+        ):
             next_index += 1
             stop_sample_index = 0
 
@@ -193,7 +197,9 @@ if __name__ == "__main__":
         metadata["files"] = [a[-15:-3] for a in data_files]
     else:  # with more batches, append end of previous file for continuity
         try:
-            data_files = data_files[(batch - 1) * batch_size - 1 : batch * batch_size]
+            data_files = data_files[
+                (batch - 1) * batch_size - 1 : batch * batch_size
+            ]
             metadata["files"] = [a[-15:-3] for a in data_files]
         except IndexError:
             data_files = data_files[(batch - 1) * batch_size - 1 :]

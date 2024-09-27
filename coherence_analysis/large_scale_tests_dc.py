@@ -25,8 +25,8 @@ Example:
 - python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0
     3100 2000 200 1000 exact 1 0
 
-    
- 
+
+
 time_range = "('06/01/23 07:32:09', '06/01/23 07:32:10')"
 """
 
@@ -44,7 +44,14 @@ if __name__ == "__main__":
     start_time = datetime.now()
 
     # list of methods to use for coherence analysis
-    METHODS: list[str] = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+    METHODS: list[str] = [
+        "exact",
+        "qr",
+        "svd",
+        "rsvd",
+        "power",
+        "qr iteration",
+    ]
 
     # Take inputs from the command line
     # Path to the directory containing the data files

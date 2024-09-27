@@ -39,7 +39,6 @@ from utils import coherence
 
 
 class coherence_analysis:
-
     def __init__(self):
         pass
 
@@ -48,7 +47,9 @@ class coherence_analysis:
         METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
 
         # Initialize the parser
-        parser = argparse.ArgumentParser(description="Coherence Analysis Configuration")
+        parser = argparse.ArgumentParser(
+            description="Coherence Analysis Configuration"
+        )
 
         # Add arguments
         parser.add_argument(
@@ -95,14 +96,20 @@ class coherence_analysis:
             default=1,
         )
         parser.add_argument(
-            "-dt", "--time_step", type=float, help="Sampling rate", default=0.002
+            "-dt",
+            "--time_step",
+            type=float,
+            help="Sampling rate",
+            default=0.002,
         )
         parser.add_argument(
             "-r",
             "--result_path",
             type=str,
             help="Directory to save results",
-            default=os.path.join(os.path.dirname(__file__), os.pardir, "data/results"),
+            default=os.path.join(
+                os.path.dirname(__file__), os.pardir, "data/results"
+            ),
         )
 
         # Parse arguments
@@ -126,11 +133,12 @@ class coherence_analysis:
         self.method = args.method
 
         if self.method not in METHODS:
-            error_msg = f"Method {self.method} not available for coherence analysis"
+            error_msg = (
+                f"Method {self.method} not available for coherence analysis"
+            )
             raise ValueError(error_msg)
 
     def read_data(self):
-
         # read the data files using the spool function from dascore
         self.spool = dc.spool(self.data_path)
 
@@ -168,7 +176,9 @@ class coherence_analysis:
             )
         )
 
-        self.detection_significance = np.stack([a[0] for a in map_out], axis=-1)
+        self.detection_significance = np.stack(
+            [a[0] for a in map_out], axis=-1
+        )
         self.eig_estimates = np.stack([a[1] for a in map_out], axis=-1)
 
     def save_results(self):
@@ -206,14 +216,18 @@ class coherence_analysis:
         # and metadata to different files
         savename = os.path.join(
             self.save_location,
-            f"{self.method}_detection_significance_" f"{start_time}_" f"{end_time}.pkl",
+            f"{self.method}_detection_significance_"
+            f"{start_time}_"
+            f"{end_time}.pkl",
         )
         with open(savename, "wb") as f:
             pickle.dump(self.detection_significance, f)
 
         savename = os.path.join(
             self.save_location,
-            f"{self.method}_eig_estimatess_" f"{start_time}_" f"{end_time}.pkl",
+            f"{self.method}_eig_estimatess_"
+            f"{start_time}_"
+            f"{end_time}.pkl",
         )
         with open(savename, "wb") as f:
             pickle.dump(self.eig_estimates, f)
