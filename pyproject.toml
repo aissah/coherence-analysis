@@ -17,3 +17,17 @@ dev-dependencies = [
 
 [tool.ruff]
 line-length = 79
+builtins = ["_"]
+
+[tool.ruff.lint]
+# Enable all `pydocstyle` rules, limiting to those that adhere to the
+# Numpy convention via `convention = "numpy"`, below.
+select = ["D", "N"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "tab"
+docstring-code-format = true
