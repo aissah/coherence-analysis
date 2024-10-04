@@ -24,7 +24,6 @@ def loadBradyHShdf5(file: str, normalize: bool = "no") -> tuple:
         beginning time of the survey.
 
     """
-
     with h5py.File(file, "r") as open_file:
         dataset = open_file["das"]
         time = open_file["t"]
@@ -76,7 +75,6 @@ def windowed_spectra(
         DESCRIPTION. Frequencies at which the spectra is computed
 
     """
-
     win_start = 0
     window_samples = int(subwindow_len / sample_interval)
     total_samples = data.shape[-1]
@@ -408,7 +406,6 @@ def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
         decomposition
 
     """
-
     num_frames = norm_win_spectra.shape[0]
     num_frames = int(num_frames * resolution)
 
@@ -594,7 +591,6 @@ def coherence(
     data = np.random.rand(100, 1000)
     detection_significance = coherence(data, 10, 5, method='exact')
     """
-
     METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
 
     if method == "exact":
@@ -651,7 +647,6 @@ def rm_laser_drift(data: np.array) -> np.array:
     data = np.random.rand(100, 1000)
     data = rm_laser_drift(data)
     """
-
     # compute median along fibre for each time sample
     med = np.median(data, axis=0)
     # subtract median from each corresponding time sample
