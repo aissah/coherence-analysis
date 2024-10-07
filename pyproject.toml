@@ -22,7 +22,7 @@ builtins = ["_"]
 [tool.ruff.lint]
 # Enable all `pydocstyle` rules, limiting to those that adhere to the
 # Numpy convention via `convention = "numpy"`, below.
-select = ["D", "N"]
+select = ["D", "N", "I", "E", "F"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
