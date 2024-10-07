@@ -75,7 +75,7 @@ def _next_data_window(
     """
     num_files = len(data_files)
     total_window_length = averaging_window_length * samples_per_sec
-    data, _ = func.loadBradyHShdf5(data_files[next_index], normalize="no")
+    data, _ = func.load_brady_hdf5(data_files[next_index], normalize="no")
     data_len = data.shape[1]
     data = data[
         first_channel : channel_offset + first_channel : int(

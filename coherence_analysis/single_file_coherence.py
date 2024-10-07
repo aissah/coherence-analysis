@@ -40,7 +40,7 @@ if __name__ == "__main__":
     file = Path(
         file
     )  # r"D:\CSM\Mines_Research\Test_data\Brady Hotspring\PoroTomo_iDAS16043_160312000048.h5"
-    data, _ = func.loadBradyHShdf5(file, normalize="no")
+    data, _ = func.load_brady_hdf5(file, normalize="no")
 
     if method in METHODS:  # method == "qr":
         detection_significance, eig_estimates = func.coherence(
