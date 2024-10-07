@@ -1,29 +1,26 @@
 """
-This python file is to test coherence analyses for a larger dataset. The was
-written for some data from Brady Geothermal DAS experiment and is in hdf5
-format. Can be ran as:
-TO DO: Add output directory as an argument
-python large_scale_test.py <data_location> <averaging_window_length>
-    <sub_window_length> <overlap> <first_channel> <channel_offset>
-        <num_channels> <samples_per_sec> <method> <batch> <batch_size>
+This python file is to test coherence analyses a directory of DAS data. This version uses dascore to read files and
+hence requires to given data to be readable by dascore. Can be ran as:
+python coherence_analysis.py <method> <data_location> <averaging_window_length>
+    <sub_window_length> <overlap: optional, flag:-o> <time_range(optional): flag -t> <channel_range(optional): flag:-ch>
+        <channel_offset(optional): flag:-ds> <time_step(optional): flag:-dt> <result_path(optional): flag:-r>
+- method: method to use for coherence analysis
 - data_location: path to the directory containing the data files
 - averaging_window_length: Averaging window length in seconds
 - sub_window_length: sub-window length in seconds
-- overlap: overlap in seconds
-- first_channel: first channel
-- num_channels: number of sensors
-- samples_per_sec: samples per second
-- channel_offset: channel offset
-- method: method to use for coherence analysis
-- batch: Batch of files assuming jobs are run in parallel for files in batches.
-    Should be one (1) if that is not the case.
-- batch_size: Number of files in batch. Should be number of files being
-    considered if job is not done in batches.
-The script will then go through the files in the batch and perform coherence
+- overlap: overlap between sub-windows in seconds
+Optional arguments:
+- time_range(flags: "-t", "--time_range"): Range of time to use for coherence analysis (in Python list format)
+- channel_range(flags: "-ch", "--channel_range"): Range of channels to use for coherence analysis (in Python list format)
+- channel_offset(flags: "-ds", "--channel_offset"): Channels to skip in between
+- time_step(flags: "-dt", "--time_step"): Sampling rate
+- result_path(flags: "-r", "--result_path"): Directory to save results
+
+The script will then go through the files in the directory provided that fall within the ranges specified and perform coherence
 analysis on the data. The results are saved to a file for later analysis.
 Example:
-- python large_scale_tests_parser.py exact "D:\CSM\Mines_Research\Test_data\Port_Angeles"
-    "('06/01/23 07:32:09', ...)" "(..., ...)" 1 60 5 0 0.002
+- python coherence_analysis.py exact "D:\CSM\Mines_Research\Test_data\Port_Angeles"
+    60 5 -o 0 -t "('06/01/23 07:32:09', ...)" -ch "(..., ...)" 
 
 """
 
