@@ -20,7 +20,7 @@ The script will then go through the files in the directory provided that fall wi
 analysis on the data. The results are saved to a file for later analysis.
 Example:
 - python coherence_analysis.py exact "D:\CSM\Mines_Research\Test_data\Port_Angeles"
-    60 5 -o 0 -t "('06/01/23 07:32:09', ...)" -ch "(..., ...)" 
+    60 5 -o 0 -t "('06/01/23 07:32:09', ...)" -ch "(..., ...)"
 
 """
 
