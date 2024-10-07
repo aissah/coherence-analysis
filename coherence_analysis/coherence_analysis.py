@@ -1,26 +1,35 @@
-"""
-This python file is to test coherence analyses a directory of DAS data. This version uses dascore to read files and
-hence requires to given data to be readable by dascore. Can be ran as:
+r"""
+Test coherence analyses a directory of DAS data.
+
+This version uses dascore to read files and hence requires to given data
+to be readable by dascore. Can be ran as:
 python coherence_analysis.py <method> <data_location> <averaging_window_length>
-    <sub_window_length> <overlap: optional, flag:-o> <time_range(optional): flag -t> <channel_range(optional): flag:-ch>
-        <channel_offset(optional): flag:-ds> <time_step(optional): flag:-dt> <result_path(optional): flag:-r>
+    <sub_window_length> <overlap: optional, flag:-o> <time_range(optional): flag -t>
+    <channel_range(optional): flag:-ch> <channel_offset(optional): flag:-ds>
+    <time_step(optional): flag:-dt> <result_path(optional): flag:-r>
+
 - method: method to use for coherence analysis
 - data_location: path to the directory containing the data files
 - averaging_window_length: Averaging window length in seconds
 - sub_window_length: sub-window length in seconds
 - overlap: overlap between sub-windows in seconds
 Optional arguments:
-- time_range(flags: "-t", "--time_range"): Range of time to use for coherence analysis (in Python list format)
-- channel_range(flags: "-ch", "--channel_range"): Range of channels to use for coherence analysis (in Python list format)
-- channel_offset(flags: "-ds", "--channel_offset"): Channels to skip in between
+- time_range(flags: "-t", "--time_range"): Range of time to use for
+coherence analysis (in Python list format)
+- channel_range(flags: "-ch", "--channel_range"): Range of channels
+to use for coherence analysis (in Python list format)
+- channel_offset(flags: "-ds", "--channel_offset"): Channels to skip
+in-between
 - time_step(flags: "-dt", "--time_step"): Sampling rate
 - result_path(flags: "-r", "--result_path"): Directory to save results
 
-The script will then go through the files in the directory provided that fall within the ranges specified and perform coherence
-analysis on the data. The results are saved to a file for later analysis.
+The script will then go through the files in the directory provided
+that fall within the ranges specified and perform coherence analysis
+on the data. The results are saved to a file for later analysis.
 Example:
 - python coherence_analysis.py exact "D:\CSM\Mines_Research\Test_data\Port_Angeles"
     60 5 -o 0 -t "('06/01/23 07:32:09', ...)" -ch "(..., ...)"
+    -ds 1 -dt 0.002 -r "D:\CSM\Mines_Research\Test_data\Port_Angeles\results"
 
 """
 
@@ -35,14 +44,21 @@ import numpy as np
 from utils import coherence
 
 
-class coherence_analysis:
+class CoherenceAnalysis:
+    """Class to perform coherence analysis on DAS data."""
+
     def __init__(self):
-        pass
+        # Define a list of methods to use for coherence analysis
+        self.methods = ["exact", "qr", "svd", "rsvd"]
 
     def _parse_args(self):
-        # Define a list of methods to use for coherence analysis
-        METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
+        """Parse command line arguments.
 
+        Raises
+        ------
+        ValueError
+            Raise error if the method selected is not available.
+        """
         # Initialize the parser
         parser = argparse.ArgumentParser(
             description="Coherence Analysis Configuration"
@@ -52,7 +68,7 @@ class coherence_analysis:
         parser.add_argument(
             "method",
             type=str,
-            choices=METHODS,
+            choices=self.methods,
             help="Method to use for coherence analysis",
         )
         parser.add_argument(
@@ -129,13 +145,14 @@ class coherence_analysis:
         self.time_step = args.time_step
         self.method = args.method
 
-        if self.method not in METHODS:
+        if self.method not in self.methods:
             error_msg = (
                 f"Method {self.method} not available for coherence analysis"
             )
             raise ValueError(error_msg)
 
     def read_data(self):
+        """Read the data files and subselect according to input parameters using dascore."""
         # read the data files using the spool function from dascore
         self.spool = dc.spool(self.data_path)
 
@@ -162,6 +179,7 @@ class coherence_analysis:
         self.time_step = self.contents["time_step"][0].total_seconds()
 
     def run(self):
+        """Implement the coherence analysis using initialized parameters."""
         # perform coherence calculation on each patch
         map_out = coherence_instance.spool.map(
             lambda x: coherence(
@@ -179,6 +197,7 @@ class coherence_analysis:
         self.eig_estimates = np.stack([a[1] for a in map_out], axis=-1)
 
     def save_results(self):
+        """Save results to a file."""
         # create a dictionary to store metadata
         metadata = {}
         metadata["time_step"] = self.time_step
@@ -242,7 +261,7 @@ if __name__ == "__main__":
     start_time = datetime.now()
 
     # Initialize the coherence_analysis instance
-    coherence_instance = coherence_analysis()
+    coherence_instance = CoherenceAnalysis()
 
     # Parse the command line arguments
     coherence_instance._parse_args()
