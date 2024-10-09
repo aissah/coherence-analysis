@@ -1,8 +1,8 @@
 r"""
 Test coherence analyses a directory of DAS data.
 
-This version uses dascore to read files and hence requires to given data
-to be readable by dascore. Can be ran as:
+This version uses dascore to read files and hence requires to given data to be
+readable by dascore. Can be ran as:
 python coherence_analysis.py <method> <data_location> <averaging_window_length>
     <sub_window_length> <overlap: optional, flag:-o> <time_range(optional): flag -t>
     <channel_range(optional): flag:-ch> <channel_offset(optional): flag:-ds>
@@ -14,18 +14,19 @@ python coherence_analysis.py <method> <data_location> <averaging_window_length>
 - sub_window_length: sub-window length in seconds
 - overlap: overlap between sub-windows in seconds
 Optional arguments:
-- time_range(flags: "-t", "--time_range"): Range of time to use for
-coherence analysis (in Python list format)
-- channel_range(flags: "-ch", "--channel_range"): Range of channels
-to use for coherence analysis (in Python list format)
+- time_range(flags: "-t", "--time_range"): Range of time to use for coherence
+analysis (in Python list format). Each time should have the format
+"%m/%d/%y %H:%M:%S".
+- channel_range(flags: "-ch", "--channel_range"): Range of channels to use for
+coherence analysis (in Python list format).
 - channel_offset(flags: "-ds", "--channel_offset"): Channels to skip
 in-between
 - time_step(flags: "-dt", "--time_step"): Sampling rate
 - result_path(flags: "-r", "--result_path"): Directory to save results
 
-The script will then go through the files in the directory provided
-that fall within the ranges specified and perform coherence analysis
-on the data. The results are saved to a file for later analysis.
+The script will then go through the files in the directory provided that fall
+within the ranges specified and perform coherence analysis on the data. The
+results are saved to a file for later analysis.
 Example:
 - python coherence_analysis.py exact "D:\CSM\Mines_Research\Test_data\Port_Angeles"
     60 5 -o 0 -t "('06/01/23 07:32:09', ...)" -ch "(..., ...)"
@@ -155,7 +156,8 @@ class CoherenceAnalysis:
         """Read the data files and subselect according to input parameters using dascore."""
         # read the data files using the spool function from dascore
         self.spool = dc.spool(self.data_path)
-
+        print(self.spool)
+        print(self.spool[0].data.shape)
         # chunk the spool into averaging_window length
         self.spool = self.spool.chunk(time=self.averaging_window_length)
 
@@ -170,10 +172,13 @@ class CoherenceAnalysis:
             self.channel_offset,
             dtype=int,
         )
-
         # subsample the spool to select the channels and time range
         self.spool = self.spool.select(distance=(channels), samples=True)
-        self.spool = self.spool.select(time=self.time_range, samples=True)
+        print(self.spool)
+        print(self.spool[0].data.shape)
+        # self.spool = self.spool.select(time=self.time_range, samples=True)
+        self.spool = self.spool.select(time=self.time_range)
+        print(self.spool[0].data.shape)
 
         self.contents = self.spool.get_contents()
         self.time_step = self.contents["time_step"][0].total_seconds()
