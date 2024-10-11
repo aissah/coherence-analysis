@@ -156,8 +156,6 @@ class CoherenceAnalysis:
         """Read the data files and subselect according to input parameters using dascore."""
         # read the data files using the spool function from dascore
         self.spool = dc.spool(self.data_path)
-        print(self.spool)
-        print(self.spool[0].data.shape)
         # chunk the spool into averaging_window length
         self.spool = self.spool.chunk(time=self.averaging_window_length)
 
@@ -172,13 +170,17 @@ class CoherenceAnalysis:
             self.channel_offset,
             dtype=int,
         )
+        # Using the distance array to select the channels with samples = False
+        # This is a temporary solution to the issue of selecting channels
+        # Only works for PRODML format
+        # TODO: need to find a more general solution
+        distance_coords = self.spool[0].coords.get_array("distance")
+        distance_array = distance_coords[channels]
         # subsample the spool to select the channels and time range
-        self.spool = self.spool.select(distance=(channels), samples=True)
-        print(self.spool)
-        print(self.spool[0].data.shape)
+        self.spool = self.spool.select(distance=(distance_array), samples=False)
+
         # self.spool = self.spool.select(time=self.time_range, samples=True)
         self.spool = self.spool.select(time=self.time_range)
-        print(self.spool[0].data.shape)
 
         self.contents = self.spool.get_contents()
         self.time_step = self.contents["time_step"][0].total_seconds()
