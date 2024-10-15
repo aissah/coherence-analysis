@@ -36,6 +36,7 @@ Example:
 
 import argparse
 import os
+from pathlib import Path
 import pickle
 from ast import literal_eval
 from datetime import datetime
@@ -235,6 +236,8 @@ class CoherenceAnalysis:
             .replace(".", "_")
         )
 
+        # Create the result directory if it does not exist
+        Path(self.save_location).mkdir(parents=True, exist_ok=True)
         # save the results of detection significance, eigenvalues,
         # and metadata to different files
         savename = os.path.join(
