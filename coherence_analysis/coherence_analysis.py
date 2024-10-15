@@ -114,8 +114,8 @@ class CoherenceAnalysis:
             "-dt",
             "--time_step",
             type=float,
-            help="Sampling rate",
-            default=0.002,
+            help="Seconds per sample",
+            default=None,
         )
         parser.add_argument(
             "-r",
@@ -157,6 +157,12 @@ class CoherenceAnalysis:
         """Read the data files and subselect according to input parameters using dascore."""
         # read the data files using the spool function from dascore
         self.spool = dc.spool(self.data_path)
+        # get the time step from the spool
+        try:
+            self.time_step = self.spool.get_contents()["time_step"].iloc[0]
+        except KeyError:
+            if self.time_step is None:
+                raise ValueError("Time step not found in data or input parameters")
         # chunk the spool into averaging_window length
         self.spool = self.spool.chunk(time=self.averaging_window_length)
 
