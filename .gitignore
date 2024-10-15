@@ -1,5 +1,5 @@
 # Data and results
-./data/*
+*/data/*
 
 # python compiled files
 */__pycache__/*
