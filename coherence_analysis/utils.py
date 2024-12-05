@@ -256,33 +256,29 @@ def covariance_preprocessing(
     freq_smoothing_win: float=0.33,
     time_smoothing_win: float=1.25,
     sample_interval: int = 1,
-) -> tuple:
+) -> np.array:
     """
     Calculate the covariance matrix at all frequencies.
 
     Parameters
     ----------
-    data : numpy array
-        Data in time for covariance analysis
-    subwindow_len : int
-        Length of the subwindows in seconds
-    overlap : int
-        Overlap between adjacent subwindows in seconds
-    freq : int, optional
-        Frequency to compute the covariance at. The default is
-        None. If None, the covariance is computed at all frequencies
+    data : 1d or 2d numpy array
+        Data in time for preprocessing
+    freq_smoothing_win : int
+        Length of frequency range for smoothing in Hz
+    time_smoothing_win : int
+        Length time window for smoothing in seconds
     sample_interval : float, optional
         Sample interval of the data. The default is 1.
 
     Returns
     -------
-    covariance : numpy array
-        Covariance matrix of the data
-    frequencies : numpy array
-        Frequencies at which the coherence is computed
+    preprocessed_data : numpy array
+        preprocesses data. Same shape as input data
 
     """
-    if data.ndim == 1:
+    data_dims = data.ndim
+    if data_dims == 1:
         data = data[np.newaxis, :]
 
     data_fft = np.fft.rfft(data[:])
@@ -300,6 +296,9 @@ def covariance_preprocessing(
     running_avg = ss.fftconvolve(np.abs(whitened_time), np.ones((len(whitened_time), time_smoothing_win_len))/time_smoothing_win_len, mode='same', axes=1)
 
     preprocessed_data = whitened_time/running_avg
+
+    if data_dims == 1:
+        preprocessed_data = preprocessed_data[0]
 
     return preprocessed_data
 
