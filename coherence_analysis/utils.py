@@ -250,6 +250,54 @@ def covariance(
 
     return covariance, frequencies
 
+def covariance_preprocessing(
+    data: np.array,
+    subwindow_len: int,
+    smoothing_freq: float=0.33,
+    smoothing_time: float=1.25,
+    freq=None,
+    sample_interval: int = 1,
+) -> tuple:
+    """
+    Calculate the covariance matrix at all frequencies.
+
+    Parameters
+    ----------
+    data : numpy array
+        Data in time for covariance analysis
+    subwindow_len : int
+        Length of the subwindows in seconds
+    overlap : int
+        Overlap between adjacent subwindows in seconds
+    freq : int, optional
+        Frequency to compute the covariance at. The default is
+        None. If None, the covariance is computed at all frequencies
+    sample_interval : float, optional
+        Sample interval of the data. The default is 1.
+
+    Returns
+    -------
+    covariance : numpy array
+        Covariance matrix of the data
+    frequencies : numpy array
+        Frequencies at which the coherence is computed
+
+    """
+    # win_spectra, frequencies = windowed_spectra(
+    #     data, subwindow_len, overlap, freq, sample_interval
+    # )
+    window_samples = int(subwindow_len / sample_interval)
+
+    spectra = np.fft.rfft(data[:])
+    frequencies = np.fft.rfftfreq(window_samples, sample_interval)
+
+    # covariance = np.matmul(
+    #     win_spectra.transpose(2, 1, 0),
+    #     np.conjugate(win_spectra.transpose(2, 0, 1)),
+    # )
+    # welch_numerator = np.absolute(welch_numerator) ** 2
+
+    return covariance, frequencies
 
 def exact_coherence(
     data: np.array,
