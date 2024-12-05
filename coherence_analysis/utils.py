@@ -1,6 +1,7 @@
 """Supporting Functions for coherence analysis of DAS data."""
 import h5py
 import numpy as np
+import scipy.signal as ss
 
 
 def load_brady_hdf5(file: str, normalize: bool = "no") -> tuple:
@@ -252,10 +253,8 @@ def covariance(
 
 def covariance_preprocessing(
     data: np.array,
-    subwindow_len: int,
-    smoothing_freq: float=0.33,
-    smoothing_time: float=1.25,
-    freq=None,
+    freq_smoothing_win: float=0.33,
+    time_smoothing_win: float=1.25,
     sample_interval: int = 1,
 ) -> tuple:
     """
@@ -283,21 +282,26 @@ def covariance_preprocessing(
         Frequencies at which the coherence is computed
 
     """
-    # win_spectra, frequencies = windowed_spectra(
-    #     data, subwindow_len, overlap, freq, sample_interval
-    # )
-    window_samples = int(subwindow_len / sample_interval)
+    if data.ndim == 1:
+        data = data[np.newaxis, :]
 
-    spectra = np.fft.rfft(data[:])
-    frequencies = np.fft.rfftfreq(window_samples, sample_interval)
+    data_fft = np.fft.rfft(data[:])
+    delta_freq = 1/(len(data[0]) * sample_interval)
+    freq_smoothing_win_len = int(freq_smoothing_win/ delta_freq)
 
-    # covariance = np.matmul(
-    #     win_spectra.transpose(2, 1, 0),
-    #     np.conjugate(win_spectra.transpose(2, 0, 1)),
-    # )
-    # welch_numerator = np.absolute(welch_numerator) ** 2
+    running_avg = ss.fftconvolve(np.abs(data_fft), np.ones((len(data_fft), freq_smoothing_win_len))/freq_smoothing_win_len, mode='same', axes=1)
 
-    return covariance, frequencies
+    spectral_whitened = data_fft/running_avg
+
+    whitened_time = np.fft.irfft(spectral_whitened)
+
+    time_smoothing_win_len = int(time_smoothing_win / sample_interval)
+
+    running_avg = ss.fftconvolve(np.abs(whitened_time), np.ones((len(whitened_time), time_smoothing_win_len))/time_smoothing_win_len, mode='same', axes=1)
+
+    preprocessed_data = whitened_time/running_avg
+
+    return preprocessed_data
 
 def exact_coherence(
     data: np.array,
