@@ -162,7 +162,9 @@ class CoherenceAnalysis:
             self.time_step = self.spool.get_contents()["time_step"].iloc[0]
         except KeyError:
             if self.time_step is None:
-                raise ValueError("Time step not found in data or input parameters")
+                raise ValueError(
+                    "Time step not found in data or input parameters"
+                )
         # chunk the spool into averaging_window length
         self.spool = self.spool.chunk(time=self.averaging_window_length)
 
@@ -184,7 +186,9 @@ class CoherenceAnalysis:
         distance_coords = self.spool[0].coords.get_array("distance")
         distance_array = distance_coords[channels]
         # subsample the spool to select the channels and time range
-        self.spool = self.spool.select(distance=(distance_array), samples=False)
+        self.spool = self.spool.select(
+            distance=(distance_array), samples=False
+        )
 
         # self.spool = self.spool.select(time=self.time_range, samples=True)
         self.spool = self.spool.select(time=self.time_range)

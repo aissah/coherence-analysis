@@ -1,4 +1,5 @@
 """Supporting Functions for coherence analysis of DAS data."""
+
 import h5py
 import numpy as np
 import scipy.signal as ss
@@ -159,8 +160,8 @@ def welch_coherence(
     sample_interval: int = 1,
 ) -> tuple:
     """
-    Calculate the coherence matrix at all frequencies. 
-    
+    Calculate the coherence matrix at all frequencies.
+
     The welch method is used for spectra density calculation.
 
     Parameters
@@ -251,10 +252,11 @@ def covariance(
 
     return covariance, frequencies
 
+
 def covariance_preprocessing(
     data: np.array,
-    freq_smoothing_win: float=0.33,
-    time_smoothing_win: float=1.25,
+    freq_smoothing_win: float = 0.33,
+    time_smoothing_win: float = 1.25,
     sample_interval: int = 1,
 ) -> np.array:
     """
@@ -282,25 +284,38 @@ def covariance_preprocessing(
         data = data[np.newaxis, :]
 
     data_fft = np.fft.rfft(data[:])
-    delta_freq = 1/(len(data[0]) * sample_interval)
-    freq_smoothing_win_len = int(freq_smoothing_win/ delta_freq)
+    delta_freq = 1 / (len(data[0]) * sample_interval)
+    freq_smoothing_win_len = int(freq_smoothing_win / delta_freq)
 
-    running_avg = ss.fftconvolve(np.abs(data_fft), np.ones((len(data_fft), freq_smoothing_win_len))/freq_smoothing_win_len, mode='same', axes=1)
+    running_avg = ss.fftconvolve(
+        np.abs(data_fft),
+        np.ones((len(data_fft), freq_smoothing_win_len))
+        / freq_smoothing_win_len,
+        mode="same",
+        axes=1,
+    )
 
-    spectral_whitened = data_fft/running_avg
+    spectral_whitened = data_fft / running_avg
 
     whitened_time = np.fft.irfft(spectral_whitened)
 
     time_smoothing_win_len = int(time_smoothing_win / sample_interval)
 
-    running_avg = ss.fftconvolve(np.abs(whitened_time), np.ones((len(whitened_time), time_smoothing_win_len))/time_smoothing_win_len, mode='same', axes=1)
+    running_avg = ss.fftconvolve(
+        np.abs(whitened_time),
+        np.ones((len(whitened_time), time_smoothing_win_len))
+        / time_smoothing_win_len,
+        mode="same",
+        axes=1,
+    )
 
-    preprocessed_data = whitened_time/running_avg
+    preprocessed_data = whitened_time / running_avg
 
     if data_dims == 1:
         preprocessed_data = preprocessed_data[0]
 
     return preprocessed_data
+
 
 def exact_coherence(
     data: np.array,
@@ -311,7 +326,7 @@ def exact_coherence(
 ):
     """
     Compute the detection significance from coherence.
-    
+
     The detection significance is the ratio of the largest eigenvalue
     to the sum of all eigenvalues. This method computes the coherence matrix
     using the Welch method, and then computes the eigenvalues and subsequent
@@ -370,7 +385,7 @@ def exact_coherence(
 def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     """
     Compute the detection significance from SVD approximation of coherence.
-    
+
     The detection significance is the ratio of the largest
     eigenvalue to the sum of all eigenvalues. This method computes the
     coherence matrix from the normalised spectra matrix provided, and then
@@ -423,7 +438,7 @@ def svd_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
 def qr_coherence(norm_win_spectra: np.ndarray, resolution: float = 1):
     """
     Compute the detection significance from QR decomposition approximation of coherence.
-    
+
     The detection significance is the ratio of the
     largest eigenvalue to the sum of all eigenvalues. This method computes the
     coherence matrix from the normalised spectra matrix provided, and then
@@ -478,7 +493,7 @@ def rsvd_coherence(
 ):
     """
     Compute the detection significance from randomized SVD approximation of coherence.
-    
+
     The detection significance is the ratio
     of the largest eigenvalue to the sum of all eigenvalues. This method
     computes the coherence matrix from the normalised spectra matrix provided,
@@ -521,7 +536,9 @@ def rsvd_coherence(
     rsvd_approxs = np.empty((num_frames, approx_rank))
 
     for d in range(num_frames):
-        _, singular_values, _ = randomized_svd(norm_win_spectra[d], approx_rank)
+        _, singular_values, _ = randomized_svd(
+            norm_win_spectra[d], approx_rank
+        )
         rsvd_approx = singular_values**2
         rsvd_approxs[d] = rsvd_approx
         detection_significance[d] = rsvd_approx[0] / np.sum(rsvd_approx)
@@ -529,7 +546,9 @@ def rsvd_coherence(
     return detection_significance, rsvd_approxs
 
 
-def qr_iteration(matrix: np.array, tol: float = 1e-6, max_iter: int = 1000) -> np.array:
+def qr_iteration(
+    matrix: np.array, tol: float = 1e-6, max_iter: int = 1000
+) -> np.array:
     """
     Compute the eigenvalues of matrix using the QR iteration method.
 
@@ -558,7 +577,9 @@ def qr_iteration(matrix: np.array, tol: float = 1e-6, max_iter: int = 1000) -> n
     return np.diag(matrix)
 
 
-def power_iteration(matrix: np.array, tol: float = 1e-6, max_iter: int = 1000) -> float:
+def power_iteration(
+    matrix: np.array, tol: float = 1e-6, max_iter: int = 1000
+) -> float:
     """
     Compute first eigenvalue of matrix using the power iteration method.
 
@@ -673,7 +694,7 @@ def coherence(
 def rm_laser_drift(data: np.array) -> np.array:
     """
     RSemove laser drift from DAS data.
-    
+
     We do this by subtracting the median of each time
     sample across the channels from each channel at that time
     sample. This assumes the first dimension of the data is

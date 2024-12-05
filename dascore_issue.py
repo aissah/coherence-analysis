@@ -5,7 +5,7 @@ memspool = dc.examples.random_spool()
 dir_spool = dc.examples.spool_to_directory(memspool)
 spool = dc.spool(dir_spool)
 # print(spool[0].coords.get_array('distance'))
-distance_coords = spool[0].coords.get_array('distance')
+distance_coords = spool[0].coords.get_array("distance")
 # integer distance array
 distance_array = distance_coords[np.arange(0, 298)]
 print(distance_array)
