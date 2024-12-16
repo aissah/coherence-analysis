@@ -190,6 +190,13 @@ class CoherenceAnalysis:
             distance=(distance_array), samples=False
         )
 
+        # A more general solution. Yet to be tested
+        # patch_list = []
+        # for patch in self.spool:
+        #     patch_list.append(patch.select(distance=(distance_array)))
+
+        # self.spool = dc.spool(patch_list)
+
         # self.spool = self.spool.select(time=self.time_range, samples=True)
         self.spool = self.spool.select(time=self.time_range)
 
