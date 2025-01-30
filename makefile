@@ -8,14 +8,14 @@ UV = uv
 all: install
 
 # Create virtual environment
-.PHONY: init
-venv:
+.PHONY: initialize
+initialize:
 	uv init
 	# python3 -m venv $(VENV)
 
 # Install dependencies
 .PHONY: install
-install: venv
+install: .venv
 	$(UV) venv $(VENV)
 	$(UV) pip install -r requirements.txt
 
