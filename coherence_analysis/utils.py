@@ -140,8 +140,8 @@ def normalised_windowed_spectra(
         data, subwindow_len, overlap, freq, sample_interval
     )
 
-    mean_spectra = np.mean(win_spectra, axis=0)
-    win_spectra -= mean_spectra
+    # mean_spectra = np.mean(win_spectra, axis=0)
+    # win_spectra -= mean_spectra
 
     normalizer = np.sum(np.absolute(win_spectra) ** 2, axis=0)
     normalizer = np.tile(np.sqrt(normalizer), (win_spectra.shape[0], 1, 1))
