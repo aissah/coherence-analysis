@@ -10,7 +10,7 @@ source activate coherence
 
 # python <method> ../coherence_analysis/coherence_analysis.py <data_directory> <averaging_window_length> <sub_window_length> <overlap> <channel_range> <channel_offset> <samples_per_sec>
 
-python ../coherence_analysis/coherence_analysis.py qr "/u/st/by/aissah/scratch/Cascadia_DAS_1078DT_25PR_14GL_5DEC_2023-05-31T21_55_57Z" 120 2 -ch "(50, 980)" -ds 3 -dt 0.002
+python ../coherence_analysis/coherence_analysis.py qr "/u/st/by/aissah/scratch/Cascadia_DAS_1078DT_25PR_14GL_5DEC_2023-05-31T21_55_57Z" 120 2 -ch "(50, 980)" -ds 3 -dt 0.002 -r ~/scratch/coherence_analysis/results_PA_data
 
 echo "QR Job finished"
 
@@ -18,6 +18,6 @@ echo "QR Job finished"
 
 # echo "Exact Job finished"
 
-python ../coherence_analysis/coherence_analysis.py svd "/u/st/by/aissah/scratch/Cascadia_DAS_1078DT_25PR_14GL_5DEC_2023-05-31T21_55_57Z" 120 2 -ch "(50, 980)" -ds 3 -dt 0.002
+python ../coherence_analysis/coherence_analysis.py svd "/u/st/by/aissah/scratch/Cascadia_DAS_1078DT_25PR_14GL_5DEC_2023-05-31T21_55_57Z" 120 2 -ch "(50, 980)" -ds 3 -dt 0.002 -r ~/scratch/coherence_analysis/results_PA_data
 
 echo "SVD Job finished"
