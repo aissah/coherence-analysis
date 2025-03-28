@@ -186,19 +186,19 @@ class CoherenceAnalysis:
         distance_coords = self.spool[0].coords.get_array("distance")
         distance_array = distance_coords[channels]
         # subsample the spool to select the channels and time range
-        self.spool = self.spool.select(
-            distance=(distance_array), samples=False
-        )
+        # self.spool = self.spool.select(
+        #     distance=(distance_array), samples=False
+        # )
 
         # A more general solution. Yet to be tested
-        # patch_list = []
-        # for patch in self.spool:
-        #     patch_list.append(patch.select(distance=(distance_array)))
+        patch_list = []
+        for patch in self.spool:
+            patch_list.append(patch.select(distance=(distance_array)))
 
-        # self.spool = dc.spool(patch_list)
+        self.spool = dc.spool(patch_list)
 
-        # self.spool = self.spool.select(time=self.time_range, samples=True)
-        self.spool = self.spool.select(time=self.time_range)
+        self.spool = self.spool.select(time=self.time_range, samples=True)
+        # self.spool = self.spool.select(time=self.time_range)
 
         self.contents = self.spool.get_contents()
         self.time_step = self.contents["time_step"][0].total_seconds()
