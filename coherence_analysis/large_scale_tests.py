@@ -32,7 +32,7 @@ import pickle
 import sys
 from datetime import datetime
 
-import functions as func
+import utils as func
 import numpy as np
 
 
