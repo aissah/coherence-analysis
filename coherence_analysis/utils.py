@@ -721,3 +721,37 @@ def rm_laser_drift(data: np.array) -> np.array:
     data = data - med[np.newaxis, :]
 
     return data
+
+def frequency_filter(data: np.array, frequency_range, mode: str, order, sampling_frequency):
+    """
+    Butterworth filter of data.
+
+    Parameters
+    ----------
+    data : array
+        1d or 2d array.
+    frequency_range : int/sequence
+        int if mode is lowpass or high pass. Sequence of 2 frequencies if mode
+        is bandpass
+    mode : str
+        lowpass, highpass or bandpass.
+    order : int
+        Order of the filter.
+    sampling_frequency : int
+        sampling frequency.
+
+    Returns
+    -------
+    filtered_data : array
+        Frequency filtered data.
+
+    """
+
+    from scipy.signal import butter, sosfiltfilt
+
+    sos = butter(
+        order, frequency_range, btype=mode, output="sos", fs=sampling_frequency
+    )
+    filtered_data = sosfiltfilt(sos, data)
+
+    return filtered_data
