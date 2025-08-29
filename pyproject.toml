@@ -19,6 +19,9 @@ notebooks = [
 modeling = [
     "deepwave>=0.0.20",
 ]
+rand-svd = [
+    "scikit-learn>=1.7.1",
+]
 
 [tool.uv]
 dev-dependencies = [
