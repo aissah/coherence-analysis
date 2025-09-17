@@ -36,10 +36,10 @@ Example:
 
 import argparse
 import os
-from pathlib import Path
 import pickle
 from ast import literal_eval
 from datetime import datetime
+from pathlib import Path
 
 import dascore as dc
 import numpy as np

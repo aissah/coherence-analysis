@@ -32,8 +32,8 @@ import pickle
 import sys
 from datetime import datetime
 
-import utils as func
 import numpy as np
+import utils as func
 
 
 def _next_data_window(

@@ -1,9 +1,10 @@
-import pytest
-from unittest.mock import MagicMock, call
-from coherence_analysis.coherence_analysis import CoherenceAnalysis
-import os
 from datetime import datetime
+from unittest.mock import MagicMock
+
 import numpy as np
+import pytest
+
+from coherence_analysis.coherence_analysis import CoherenceAnalysis
 
 
 @pytest.fixture
