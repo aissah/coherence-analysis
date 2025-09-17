@@ -32,7 +32,10 @@ def instance():
 
 def test_parse_args_valid(mocker, valid_args, instance):
     """Test valid argument parsing."""
-    mocker.patch("argparse.ArgumentParser.parse_args", return_value=argparse.Namespace(**valid_args))
+    mocker.patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=argparse.Namespace(**valid_args),
+    )
 
     instance._parse_args()
 
@@ -65,17 +68,25 @@ def test_parse_args_invalid_method(mocker, instance):
         "time_step": 0.002,
         "result_path": "test_results",
     }
-    mocker.patch("argparse.ArgumentParser.parse_args", return_value=argparse.Namespace(**invalid_args))
+    mocker.patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=argparse.Namespace(**invalid_args),
+    )
 
-    with pytest.raises(ValueError, match="not available for coherence analysis"):
+    with pytest.raises(
+        ValueError, match="not available for coherence analysis"
+    ):
         instance._parse_args()
+
 
 @pytest.mark.benchmark
 def test_read_data(mocker, instance):
     """Test data reading with mocked dascore.spool."""
     mock_spool = mocker.patch("dascore.spool", return_value=MagicMock())
     mock_spool_instance = mock_spool.return_value
-    mock_spool_instance.get_contents.return_value = {"time_step": [MagicMock(total_seconds=MagicMock(return_value=0.002))]}
+    mock_spool_instance.get_contents.return_value = {
+        "time_step": [MagicMock(total_seconds=MagicMock(return_value=0.002))]
+    }
     mock_spool_instance.chunk.return_value = mock_spool_instance
     mock_spool_instance.select.return_value = mock_spool_instance
 
@@ -91,15 +102,16 @@ def test_read_data(mocker, instance):
     mock_spool.assert_called_once_with("test_data")
     mock_spool_instance.chunk.assert_called_once_with(time=60)
     mock_spool_instance.select.assert_any_call(time=instance.time_range)
-    mock_spool_instance.select.assert_any_call(distance=mock.ANY, samples=False)
+    mock_spool_instance.select.assert_any_call(
+        distance=mock.ANY, samples=False
+    )
 
 
 def test_run(mocker, instance):
     """Test coherence analysis execution."""
     mock_map = mocker.patch.object(instance, "spool", MagicMock())
     mock_map.map.return_value = [
-        (np.random.rand(5, 5), np.random.rand(5, 5))
-        for _ in range(3)
+        (np.random.rand(5, 5), np.random.rand(5, 5)) for _ in range(3)
     ]
 
     instance.spool = mock_map

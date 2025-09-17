@@ -722,7 +722,10 @@ def rm_laser_drift(data: np.array) -> np.array:
 
     return data
 
-def frequency_filter(data: np.array, frequency_range, mode: str, order, sampling_frequency):
+
+def frequency_filter(
+    data: np.array, frequency_range, mode: str, order, sampling_frequency
+):
     """
     Butterworth filter of data.
 
