@@ -3,7 +3,7 @@
 
 ## Overview
 
-This repository contains research code for performing coherence analyses on Distributed Acoustic Sensing (DAS) data.
+This repository contains research code for performing coherence analyses on Distributed Acoustic Sensing (DAS) data. This version has been trimmed to remove the history of development and make it lighter for sharing. The complete development history is available at the original repository: [https://github.com/aissah/coherence_analysis_histroy](https://github.com/aissah/coherence_analysis_histroy)
 
 ## Features
 
