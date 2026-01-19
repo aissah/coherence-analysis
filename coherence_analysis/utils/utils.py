@@ -325,6 +325,7 @@ def exact_coherence(
     sample_interval: int = 1,
     max_freq: float = None,
     min_freq: float = 0,
+    remove_center: str = None,
 ) -> tuple:
     """
     Compute the detection significance from coherence.
@@ -385,12 +386,16 @@ def exact_coherence(
     # freq_interval = int(1 / resolution)
 
     for d in range(num_frames):
-        # eigenvals, _ = np.linalg.eig(coherence[d * freq_interval])
         # eigenvals = np.linalg.eigvalsh(coherence[d * freq_interval])
         eigenvals = np.linalg.eigvalsh(coherence[d])
         eigenvalss[d] = eigenvals[:num_subwindows]
         eigenvals = np.sort(eigenvals)[::-1]
         detection_significance[d] = eigenvals[0] / np.sum(eigenvals)
+
+    if remove_center == "mean":
+        detection_significance -= np.mean(detection_significance)
+    elif remove_center == "median":
+        detection_significance -= np.median(detection_significance)
 
     return detection_significance, eigenvalss, frequencies
 
