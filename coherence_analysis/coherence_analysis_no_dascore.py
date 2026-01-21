@@ -4,7 +4,7 @@ Test coherence analyses for a larger dataset.
 The was written for some data from Brady Geothermal DAS experiment
 and is in hdf5 format. Can be ran as:
 TO DO: Add output directory as an argument
-python large_scale_test.py <data_location> <averaging_window_length>
+python coherence_analysis_no_dascore <data_location> <averaging_window_length>
     <sub_window_length> <overlap> <first_channel> <channel_offset>
         <num_channels> <samples_per_sec> <method> <batch> <batch_size>
 - data_location: path to the directory containing the data files
