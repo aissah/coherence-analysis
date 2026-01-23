@@ -7,8 +7,7 @@ python coherence_analysis_no_dascore.py <method> <data_location>
     <averaging_window_length> <sub_window_length> <overlap: optional, flag:-o>
     <channel_range(optional): flag:-ch> <channel_offset(optional): flag:-ds>
     <time_step(optional): flag:-dt> <result_path(optional): flag:-r>
-    <parallel(optional): flag:-p> <batch(optional): flag:-b>
-    <batch_size(optional): flag:-bs>
+    <batch(optional): flag:-b> <batch_size(optional): flag:-bs>
 - data_location: path to the directory containing the data files
 - averaging_window_length: Averaging window length in seconds
 - sub_window_length: sub-window length in seconds
@@ -17,6 +16,7 @@ python coherence_analysis_no_dascore.py <method> <data_location>
 - channel_offset: channels to skip in between selected channels
 - time_step: seconds per sample
 - method: method to use for coherence analysis
+- result_path: directory to save results
 - batch: Batch of files assuming jobs are run in parallel for files in batches.
     Should be one (1) if that is not the case.
 - batch_size: Number of files in batch. Should be number of files being
@@ -26,7 +26,7 @@ analysis on the data. The results are saved to a file for later analysis.
 Example:
 - python coherence_analysis_no_dascore.py exact
     "/beegfs/projects/martin/BradyHotspring" 60 2 0 -o 0 -ch "(0, ...)"
-    -ds 2000 -dt 0.001
+    -ds 2 -dt 0.001
     -r "/u/st/by/aissah/scratch/coherence/coherence_test_results" -b 1 -bs 0
 
 """
@@ -262,12 +262,6 @@ def parse_args():
         default=os.path.join(
             os.path.dirname(__file__), os.pardir, "data/results"
         ),
-    )
-    parser.add_argument(
-        "-p",
-        "--parallel",
-        help="Whether to parallelize the computation",
-        action="store_true",
     )
     parser.add_argument(
         "-b",
