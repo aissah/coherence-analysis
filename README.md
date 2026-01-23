@@ -59,7 +59,7 @@ This repo can be used through command line scripts or importing the utility func
 The command line interface takes care of I/O prodived the data can be read by dascore. Run coherence analysis on a directory of DAS data:
 
 ```sh
-python coherence_analysis/coherence_analysis.py <method> <data_path> <averaging_window_length> <sub_window_length> [-o <overlap>] [-t <time_range>] [-ch <channel_range>] [-ds <channel_offset>] [-dt <time_step>] [-r <result_path>]
+python coherence_analysis/coherence_analysis.py <method> <data_path> <averaging_window_length> <sub_window_length> [-o <overlap>] [-t <time_range>] [-ch <channel_range>] [-ds <channel_offset>] [-dt <time_step>] [-r <result_path>] [-p <parallel>]
 ```
 
 Example:
@@ -71,10 +71,16 @@ python coherence_analysis/coherence_analysis.py exact "data/Port_Angeles" 60 5 -
 For a directory containing large amounts of data, the current implementation runs into memory issues. Hence, there is a more premitive command line option that uses a custom reader. This can be ran as follows:
 
 ```sh
-python coherence_analysis/coherence_analysis_no_dascore.py <data_path> <averaging_window_length> <sub_window_length> <overlap> <first_channel> <channel_offset> <num_channels> <samples_per_sec> <batch> <batch_size>
+python coherence_analysis/coherence_analysis_no_dascore.py  <method> <data_path> <averaging_window_length> <sub_window_length> [-o <overlap>] [-ch <channel_range>] [-ds <channel_offset>] [-dt <time_step>] [-r <result_path>] [-b <batch>] [-bs <batch_size>]
 ```
 
-Details of the arguments can be found in the docstring of the script.
+More details of the arguments can be found in the docstring of the script. One notable difference is that this script does not have an option for time range selection. This option is nicely handled by dascore but it turns out is not that straightforward to implement in a custom reader.
+
+The output results are saved in the specified result path as pickle files for later analysis. The naming convention involves the first start time of the files considered and last end time of the files considered. There are three files saved for each run:
+
+- Detection parameters computed
+- Eigenvalues of the coherence matrices
+- Metadata about the run (data file names, parameters used, etc.)
 
 The files in coherence_analysis/extras/ can also be run from the command line for specific use cases.
 
