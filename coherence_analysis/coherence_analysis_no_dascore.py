@@ -3,18 +3,19 @@ Test coherence analyses for a larger dataset.
 
 The was written for some data from Brady Geothermal DAS experiment
 and is in hdf5 format. Can be ran as:
-TO DO: Add output directory as an argument
-python coherence_analysis_no_dascore <data_location> <averaging_window_length>
-    <sub_window_length> <overlap> <first_channel> <channel_offset>
-        <num_channels> <samples_per_sec> <method> <batch> <batch_size>
+python coherence_analysis_no_dascore.py <method> <data_location>
+    <averaging_window_length> <sub_window_length> <overlap: optional, flag:-o>
+    <channel_range(optional): flag:-ch> <channel_offset(optional): flag:-ds>
+    <time_step(optional): flag:-dt> <result_path(optional): flag:-r>
+    <parallel(optional): flag:-p> <batch(optional): flag:-b>
+    <batch_size(optional): flag:-bs>
 - data_location: path to the directory containing the data files
 - averaging_window_length: Averaging window length in seconds
 - sub_window_length: sub-window length in seconds
 - overlap: overlap in seconds
-- first_channel: first channel
-- num_channels: number of sensors
-- samples_per_sec: samples per second
-- channel_offset: channel offset
+- channel_range: range of channels to use for coherence analysis
+- channel_offset: channels to skip in between selected channels
+- time_step: seconds per sample
 - method: method to use for coherence analysis
 - batch: Batch of files assuming jobs are run in parallel for files in batches.
     Should be one (1) if that is not the case.
@@ -23,14 +24,17 @@ python coherence_analysis_no_dascore <data_location> <averaging_window_length>
 The script will then go through the files in the batch and perform coherence
 analysis on the data. The results are saved to a file for later analysis.
 Example:
-- python large_scale_test.py "/beegfs/projects/martin/BradyHotspring" 60 2 0
-    3100 2000 200 1000 exact 1 0
+- python coherence_analysis_no_dascore.py exact
+    "/beegfs/projects/martin/BradyHotspring" 60 2 0 -o 0 -ch "(0, ...)"
+    -ds 2000 -dt 0.001
+    -r "/u/st/by/aissah/scratch/coherence/coherence_test_results" -b 1 -bs 0
 
 """
 
+import argparse
 import os
 import pickle
-import sys
+from ast import literal_eval
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -94,10 +98,14 @@ def _next_data_window(
     stop_sample_index = (
         start_sample_index + total_window_length
     )  # index we stopped reading data from file "next_index"
+    # data = data[
+    #     first_channel : channel_offset + first_channel : int(
+    #         channel_offset / num_channels
+    #     ),
+    #     start_sample_index:stop_sample_index,
+    # ]
     data = data[
-        first_channel : channel_offset + first_channel : int(
-            channel_offset / num_channels
-        ),
+        first_channel:last_channel:channel_offset,
         start_sample_index:stop_sample_index,
     ]
 
@@ -126,10 +134,14 @@ def _next_data_window(
                 normalize="no",
             )
             data = func.rm_laser_drift(data)
+            # data = data[
+            #     first_channel : channel_offset + first_channel : int(
+            #         channel_offset / num_channels
+            #     ),
+            #     :total_window_length,
+            # ]
             data = data[
-                first_channel : channel_offset + first_channel : int(
-                    channel_offset / num_channels
-                ),
+                first_channel:last_channel:channel_offset,
                 :total_window_length,
             ]
             window_deficit = total_window_length - data.shape[1]
@@ -142,11 +154,12 @@ def _next_data_window(
                 normalize="no",
             )
             next_data = func.rm_laser_drift(next_data)
-            next_data = next_data[
-                first_channel : channel_offset + first_channel : int(
-                    channel_offset / num_channels
-                )
-            ]
+            # next_data = next_data[
+            #     first_channel : channel_offset + first_channel : int(
+            #         channel_offset / num_channels
+            #     )
+            # ]
+            next_data = next_data[first_channel:last_channel:channel_offset]
             data = np.append(data, next_data[:, :window_deficit], axis=1)
 
             if window_deficit < next_data.shape[1]:
@@ -174,6 +187,106 @@ def _next_data_window(
     )
 
 
+def parse_args():
+    """Parse command line arguments.
+
+    Raises
+    ------
+    ValueError
+        Raise error if the method selected is not available.
+    """
+    methods = ["exact", "qr", "svd", "rsvd"]
+    # Initialize the parser
+    parser = argparse.ArgumentParser(
+        description="Coherence Analysis Configuration"
+    )
+
+    # Add arguments
+    parser.add_argument(
+        "method",
+        type=str,
+        choices=methods,
+        help="Method to use for coherence analysis",
+    )
+    parser.add_argument(
+        "data_path",
+        type=str,
+        help="Path to the directory containing the data files",
+    )
+    parser.add_argument(
+        "averaging_window_length",
+        type=int,
+        help="Averaging window length in seconds",
+    )
+    parser.add_argument(
+        "sub_window_length", type=int, help="Sub-window length in seconds"
+    )
+    parser.add_argument(
+        "-o", "--overlap", type=int, help="Overlap in seconds", default=0
+    )
+    parser.add_argument(
+        "-t",
+        "--time_range",
+        type=str,
+        help="Range of time to use for coherence analysis "
+        "(in Python list format)",
+        default="(..., ...)",
+    )
+    parser.add_argument(
+        "-ch",
+        "--channel_range",
+        type=str,
+        help="Range of channels to use for coherence analysis "
+        " (in Python list format)",
+        default="(0, ...)",
+    )
+    parser.add_argument(
+        "-ds",
+        "--channel_offset",
+        type=int,
+        help="Channels to skip in between",
+        default=1,
+    )
+    parser.add_argument(
+        "-dt",
+        "--time_step",
+        type=float,
+        help="Seconds per sample",
+        default=None,
+    )
+    parser.add_argument(
+        "-r",
+        "--result_path",
+        type=str,
+        help="Directory to save results",
+        default=os.path.join(
+            os.path.dirname(__file__), os.pardir, "data/results"
+        ),
+    )
+    parser.add_argument(
+        "-p",
+        "--parallel",
+        help="Whether to parallelize the computation",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-b",
+        "--batch",
+        type=int,
+        help="Which batch of files to process",
+        default=1,
+    )
+    parser.add_argument(
+        "-bs",
+        "--batch_size",
+        help="Number of files in each batch",
+        type=int,
+        default=0,
+    )
+
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
     # record start time
     start_time = datetime.now()
@@ -182,35 +295,44 @@ if __name__ == "__main__":
     METHODS = ["exact", "qr", "svd", "rsvd", "power", "qr iteration"]
 
     # Take inputs from the command line
+    args = parse_args()
+
     # Path to the directory containing the data files
-    data_basepath = sys.argv[1]
+    data_basepath = args.data_path
     # Path to the directory where the results will be saved
-    # save_location = sys.argv[12]
+    save_location = args.result_path
     # Averaging window length in seconds
-    averaging_window_length = int(sys.argv[2])
-    sub_window_length = int(sys.argv[3])  # sub-window length in seconds
-    overlap = int(sys.argv[4])  # overlap in seconds
-    first_channel = int(sys.argv[5])  # first channel
-    channel_offset = int(sys.argv[6])  # Number of channels to choose from
-    num_channels = int(
-        sys.argv[7]
-    )  # Number of channels to subselect from the range of channels
-    samples_per_sec = int(sys.argv[8])  # samples per second
-    method = sys.argv[9]  # method to use for coherence analysis
+    averaging_window_length = args.averaging_window_length
+    # sub-window length in seconds
+    sub_window_length = args.sub_window_length
+    # overlap in seconds
+    overlap = args.overlap
+    channel_range = literal_eval(args.channel_range)
+    # first channel
+    first_channel = 0 if channel_range[0] == ... else channel_range[0]
+    # channel offset
+    # Number of channels to choose from
+    channel_offset = args.channel_offset
+    # Number of channels to subselect from the range of channels
+    # num_channels = int(sys.argv[7])
+    last_channel = -1 if channel_range[1] == ... else channel_range[1]
+    # seconds per sample
+    samples_per_sec = 1 / args.time_step
+    # method to use for coherence analysis
+    method = args.method
     # Batch of files assuming jobs are run in parallel for files in batches.
     # Should be one if that is not the case.
-    batch = int(sys.argv[10])
+    batch = args.batch
     # Number of files in batch. Should be 0 or number of files being
     # considered if job is not done in batches.
-    batch_size = int(sys.argv[11])
+    batch_size = args.batch_size
 
     # Path to the directory containing the data files
     # data_basepath = "/beegfs/projects/martin/BradyHotspring"
     # "D:/CSM/Mines_Research/Test_data/Brady Hotspring"
 
     # Path to the directory where the results will be saved
-    save_location = "/u/st/by/aissah/scratch/coherence/coherence_test_results"
-    # "D:/CSM/Mines_Research/Test_data/"
+    # save_location="/u/st/by/aissah/scratch/coherence/coherence_test_results"
 
     # Get the file names of the data files by going through the folders
     # contained in the base path and putting together the paths to files
@@ -236,8 +358,9 @@ if __name__ == "__main__":
     metadata["averaging_window_length"] = averaging_window_length
     metadata["sub_window_length"] = sub_window_length
     metadata["overlap"] = overlap
-    metadata["first_channel"] = first_channel
-    metadata["num_channels"] = num_channels
+    # metadata["first_channel"] = first_channel
+    metadata["channel_range"] = channel_range
+    # metadata["num_channels"] = num_channels
     metadata["channel_offset"] = channel_offset
     metadata["method"] = method
 
