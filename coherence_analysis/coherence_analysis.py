@@ -5,9 +5,9 @@ This version uses dascore to read files and hence requires to given data to be
 readable by dascore. Can be ran as:
 python coherence_analysis.py <method> <data_location> <averaging_window_length>
     <sub_window_length> <overlap: optional, flag:-o>
-    <time_range(optional): flag -t>
-    <channel_range(optional): flag:-ch> <channel_offset(optional): flag:-ds>
-    <time_step(optional): flag:-dt> <result_path(optional): flag:-r>
+    <time_range(optional): flag -t> <channel_range(optional): flag:-ch>
+    <channel_offset(optional): flag:-ds> <time_step(optional): flag:-dt>
+    <result_path(optional): flag:-r> <parallel(optional): flag:-p>
 
 - method: method to use for coherence analysis
 - data_location: path to the directory containing the data files
@@ -24,6 +24,7 @@ coherence analysis (in Python list format).
 in-between
 - time_step(flags: "-dt", "--time_step"): Sampling rate
 - result_path(flags: "-r", "--result_path"): Directory to save results
+- parallel(flags: "-p", "--parallel"): Whether to parallelize the computation
 
 The script will then go through the files in the directory provided that fall
 within the ranges specified and perform coherence analysis on the data. The
