@@ -35,6 +35,26 @@ Example:
     60 5 -o 0 -t "('06/01/23 07:32:09', ...)" -ch "(..., ...)"
     -ds 1 -dt 0.002 -r "D:\CSM\Mines_Research\Test_data\Port_Angeles\results"
 
+The results are saved to the specified result_path directory as pickle files.
+The default result_path is "../data/results" relative to the script location.
+There are three files saved for each batch:
+- detection significances: np array of shape
+    (num_averaging_windows, num_frequencies)
+- eigenvalues: np array of shape
+    (num_frequencies, min(num_channels, num_subwindows)*num_averaging_windows)
+- metadata: dictionary containing the parameters used for coherence analysis
+such as sampling rate, averaging window length, sub-window length, overlap,
+channel range, channel offset, method, list of files used, window start and
+end times, and ignored files.
+
+The files are named as:
+- <method>_detection_significance_<first_file_date>_<last_file_date>.pkl
+- <method>_eig_estimatess_<first_file_date>_<last_file_date>.pkl
+- <method>_metadata_<first_file_date>_<last_file_date>.pkl
+
+Where <method> is the method used for coherence analysis, <first_file_date> is
+the first file date in the batch, and <last_file_date> is the last file date
+in the batch.
 """
 
 import argparse
