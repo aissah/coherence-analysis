@@ -213,7 +213,7 @@ class CoherenceAnalysis:
                 )
         # chunk the spool into averaging_window length
         self.spool = self.spool.chunk(
-            time=self.averaging_window_length, keep_partial=True
+            time=self.averaging_window_length, keep_partial=False
         )
 
         self.spool = self.spool.select(time=self.time_range, samples=True)
