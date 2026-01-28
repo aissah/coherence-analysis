@@ -68,12 +68,13 @@ Example:
 python coherence_analysis/coherence_analysis.py exact "data/Port_Angeles" 60 5 -o 0 -t "('06/01/23 07:32:09', '06/01/23 07:42:09')" -ch "(0, 10)" -ds 1 -dt 0.002 -r "data/results"
 ```
 
-For a directory containing large amounts of data, the current implementation runs into memory issues. Hence, there is a more premitive command line option that uses a custom reader. This can be ran as follows:
+For a directory containing large amounts of data, the current implementation sometimes runs into memory issues. Hence, there is a more premitive command line option that uses a custom reader. This can be ran as follows:
 
 ```sh
 python coherence_analysis/coherence_analysis_no_dascore.py  <method> <data_path> <averaging_window_length> <sub_window_length> [-o <overlap>] [-ch <channel_range>] [-ds <channel_offset>] [-dt <time_step>] [-r <result_path>] [-b <batch>] [-bs <batch_size>]
 ```
 
+Another situation where this script was useful was when the chunking of dascore was having issues due to some metadata errors in the data files.
 More details of the arguments can be found in the docstring of the script. One notable difference is that this script does not have an option for time range selection. This option is nicely handled by dascore but it turns out is not that straightforward to implement in a custom reader.
 
 The output results are saved in the specified result path as pickle files for later analysis. The default result_path is "../data/results" relative to the script location. There are three files saved for each run:
@@ -108,11 +109,3 @@ Explore and visualize coherence analysis results using the notebooks in the `not
 - Effects of noise coherence matrix analysis
 - Impact of event frequency on coherence matrix analysis
 - Experiments with model data
-
-## Testing
-
-Test suite is not fully implemented yet.
-
-## License
-
-This project is for research purposes. Licensing details to be determined.
