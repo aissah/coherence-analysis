@@ -76,11 +76,26 @@ python coherence_analysis/coherence_analysis_no_dascore.py  <method> <data_path>
 
 More details of the arguments can be found in the docstring of the script. One notable difference is that this script does not have an option for time range selection. This option is nicely handled by dascore but it turns out is not that straightforward to implement in a custom reader.
 
-The output results are saved in the specified result path as pickle files for later analysis. The naming convention involves the first start time of the files considered and last end time of the files considered. There are three files saved for each run:
+The output results are saved in the specified result path as pickle files for later analysis. The default result_path is "../data/results" relative to the script location. There are three files saved for each run:
 
-- Detection parameters computed
-- Eigenvalues of the coherence matrices
-- Metadata about the run (data file names, parameters used, etc.)
+- Detection parameters: np array of shape
+    (num_averaging_windows, num_frequencies)
+- Eigenvalues of the coherence matrices: np array of shape
+    (num_frequencies, min(num_channels, num_subwindows) * num_averaging_windows)
+- metadata: dictionary containing the parameters used for coherence analysis
+such as sampling rate, averaging window length, sub-window length, overlap,
+channel range, channel offset, method, list of files used, window start and
+end times, and ignored files.
+
+The files are named as:
+
+- `{method}_detection_significance_{first_file_date}_{last_file_date}.pkl`
+- `{method}_eig_estimatess_{first_file_date}_{last_file_date}.pkl`
+- `{method}_metadata_{first_file_date}_{last_file_date}.pkl`
+
+Where {method} is the method used for coherence analysis, {first_file_date} is
+the first file date in the batch, and {last_file_date} is the last file date
+in the batch.
 
 The files in coherence_analysis/extras/ can also be run from the command line for specific use cases.
 
