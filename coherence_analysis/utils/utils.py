@@ -81,21 +81,23 @@ def windowed_spectra(
     window_samples = int(subwindow_len / sample_interval)
     total_samples = data.shape[-1]
     overlap = int(overlap / sample_interval)
-    intervals = np.arange(
-        window_samples, total_samples + 1, window_samples, dtype=int
-    )  # break time series into windowed intervals
+    # intervals = np.arange(
+    #     window_samples, total_samples + 1, window_samples, dtype=int
+    # )  # break time series into windowed intervals
 
-    win_end = intervals[0]
+    win_end = window_samples
 
     spectra = np.fft.rfft(data[:, win_start:win_end])
     win_spectra = spectra[np.newaxis]
 
+    win_start = win_end - overlap
+    win_end = win_start + window_samples
     while win_end < total_samples:
-        win_start = win_end - overlap
-        win_end = win_start + window_samples
         spectra = np.fft.rfft(data[:, win_start:win_end])
         win_spectra = np.append(win_spectra, spectra[np.newaxis], axis=0)
         # win_start = win_end
+        win_start = win_end - overlap
+        win_end = win_start + window_samples
 
     frequencies = np.fft.rfftfreq(window_samples, sample_interval)
 
