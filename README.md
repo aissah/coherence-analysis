@@ -83,10 +83,7 @@ The output results are saved in the specified result path as pickle files for la
     (num_averaging_windows, num_frequencies)
 - Eigenvalues of the coherence matrices: np array of shape
     (num_frequencies, min(num_channels, num_subwindows) * num_averaging_windows)
-- metadata: dictionary containing the parameters used for coherence analysis
-such as sampling rate, averaging window length, sub-window length, overlap,
-channel range, channel offset, method, list of files used, window start and
-end times, and ignored files.
+- metadata: dictionary containing the parameters used for coherence analysis such as sampling rate, averaging window length, sub-window length, overlap, channel range, channel offset, method, list of files used, window start and end times, and ignored files.
 
 The files are named as:
 
@@ -94,9 +91,7 @@ The files are named as:
 - `{method}_eig_estimatess_{first_file_date}_{last_file_date}.pkl`
 - `{method}_metadata_{first_file_date}_{last_file_date}.pkl`
 
-Where {method} is the method used for coherence analysis, {first_file_date} is
-the first file date in the batch, and {last_file_date} is the last file date
-in the batch.
+Where {method} is the method used for coherence analysis, {first_file_date} is the first file date in the batch, and {last_file_date} is the last file date in the batch.
 
 The files in coherence_analysis/extras/ can also be run from the command line for specific use cases.
 
