@@ -25,6 +25,7 @@ Example:
 
 import argparse
 import os
+import sys
 from datetime import datetime, timedelta
 
 import dascore as dc
@@ -32,8 +33,10 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import utils.utils as func
 from matplotlib.lines import Line2D
+
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+import utils.utils as func
 
 
 def parse_args():
@@ -74,7 +77,7 @@ def parse_args():
         type=str,
         help="Directory to save results",
         default=os.path.join(
-            os.path.dirname(__file__), os.pardir, "data/results"
+            os.path.dirname(__file__), os.pardir, os.pardir, "data/results"
         ),
     )
 
@@ -324,7 +327,7 @@ if __name__ == "__main__":
     distance_array = distance_coords[channels]
 
     # Set plot parameters
-    dpi = 600
+    dpi = 100
     label_size = 16
     tick_size = 14
     legend_size = 12
@@ -548,4 +551,4 @@ if __name__ == "__main__":
     # fig.tight_layout()
     print("Saving plot...", flush=True)
     os.makedirs(args.result_path, exist_ok=True)
-    plt.savefig(os.path.join(args.result_path, "combined_data_plot.png"))
+    plt.savefig(os.path.join(args.result_path, "combined_data_plot_lr.png"))
